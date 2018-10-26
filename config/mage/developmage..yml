@@ -1,0 +1,25 @@
+magephp:
+    environments:
+        develop:
+            user: zhenpeng8
+            from: /data0/task/
+            host_path: /var/www/tmp
+            releases: 100
+            exclude:
+                - './var/cache/*'
+                - './var/log/*'
+                - ./web/app_dev.php
+            hosts:
+                - 127.0.0.0.1
+                - 127.0.0.2
+            pre-deploy:
+                - deploy/tar/prepare
+            on-deploy:
+                - deploy/tar/copy
+                - deploy/release/prepare
+            on-release:
+                - deploy/release
+            post-release:
+                - deploy/release/cleanup
+            post-deploy:
+                - deploy/tar/cleanup

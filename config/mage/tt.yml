@@ -1,0 +1,3 @@
+magephp:
+   logdir: /data/log
+   environment: { foo: bar, bar: [foo, bar, bar, baz], string: "- Multiple\n- Line\n- String" }
