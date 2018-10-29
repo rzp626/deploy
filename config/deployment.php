@@ -6,7 +6,7 @@
 return [
     'deploy_config' => [
         'task_branch' => [
-            0 => 'production',
+            0 => 'master',
             1 => 'test',
             2 => 'develop',
             3 => 'sendbox',
@@ -18,7 +18,12 @@ return [
             3 => 'sendbox',
         ],
         'pre-deploy' => [
-            0 => 'deploy/tar/prepare',
+            0 => 'git/change-branch',
+            1 => 'git/update',
+            2 => 'composer/install',
+            3 => 'composer/dump-autoload',
+            4 => 'composer/self-update',
+            5 => 'deploy/tar/prepare',
         ],
         'on-deploy' => [
             0 => 'deploy/release/prepare',
@@ -66,6 +71,7 @@ return [
 
     'yml_map_fields' => [
         'user' => 'config_user|normal',
+        'branch' => 'config_branch|map',
         'from' => 'config_from|normal',
         'host_path' => 'config_host_path|normal',
         'releases' => 'config_releases|int',
@@ -84,6 +90,7 @@ return [
         'tar_extract' => 'xf',
         'tar_extract_path' => 'tar',
         'user' => '',
+        'branch' => '',
         'from' => '',
         'host_path' => '',
         'releases' => '',

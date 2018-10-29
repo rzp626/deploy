@@ -104,7 +104,7 @@ class UtilsService
         ];
         Log::info('tmpFields'.print_r($tmplFields,true));
         Log::info('tmp:'.print_r($tmpl, true));
-        $split = ',';
+        $split = '|';
         $customStr = 'custom_';
         $mageYmlFile['magephp']['environments'][$config_env] = $common_items;
         foreach ($tmpl as $key => $value) {
@@ -113,6 +113,8 @@ class UtilsService
                 $tmpArr = explode('|', $tmplFields[$key]);
                 if ($tmpArr[1] == 'normal') {
                     $mageYmlFile['magephp']['environments'][$config_env][$key] = ${$tmpArr[0]};
+                } else if ($tmpArr[1] == 'map') {
+                    $mageYmlFile['magephp']['environments'][$config_env][$key] = $deployConfig['task_branch'][${$tmpArr[0]}];
                 } else if ($tmpArr[1] == 'int') {
                     $mageYmlFile['magephp']['environments'][$config_env][$key] = (int)${$tmpArr[0]};
                 } else if ($tmpArr[1] == 'array') {
@@ -120,7 +122,7 @@ class UtilsService
                         if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
                             $mageYmlFile['magephp']['environments'][$config_env][$key] = '';
                         } else {
-                            $mageYmlFile['magephp']['environments'][$config_env][$key] = explode($split, ${$tmpArr[0]});
+                            $mageYmlFile['magephp']['environments'][$config_env][$key] = explode($split, trim(${$tmpArr[0]}, "'"));
                         }
                     } else if (is_array(${$tmpArr[0]})) {
                         $customArr = $builInArr= [];
@@ -147,7 +149,8 @@ class UtilsService
             Log::info('magephp'.print_r($mageYmlFile, true));
         }
 
-        $yaml = Yaml::dump($mageYmlFile, 5, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+        $yaml = preg_replace("/'/", '', Yaml::dump($mageYmlFile, 5, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+        Log::info('the yaml content: '.print_r($yaml, true));
         file_put_contents(config_path() . '/mage/'.$config_env.'.mage.yml', $yaml);
     }
 }

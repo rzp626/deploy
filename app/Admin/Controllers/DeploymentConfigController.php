@@ -72,7 +72,7 @@ class DeploymentConfigController extends Controller
     {
         return $content
             ->header('新增部署配置')
-            ->description('新增部署主机的各个配置项')
+            ->description('新增部署配置项目')
             ->body($this->form());
     }
 
@@ -101,7 +101,7 @@ class DeploymentConfigController extends Controller
         $grid->config_hosts('部署主机');
         $grid->config_pre_deploy('部署前命令')->display(function ($config_pre_deploy) {
             $arr = config('deployment.deploy_config.pre-deploy');
-            $preArr = explode(',', $config_pre_deploy);
+            $preArr = explode('|', $config_pre_deploy);
             $line = '';
             $custom = 'custom_';
             $len = strlen($custom);
@@ -134,7 +134,7 @@ class DeploymentConfigController extends Controller
         });
         $grid->config_on_release('发布时命令')->display(function ($config_on_release) {
             $arr = config('deployment.deploy_config.on-release');
-            $preArr = explode(',', $config_on_release);
+            $preArr = explode('|', $config_on_release);
             $line = '';
             $custom = 'custom_';
             $len = strlen($custom);
@@ -150,7 +150,7 @@ class DeploymentConfigController extends Controller
         });
         $grid->config_post_release('发布后命令')->display(function ($config_post_release){
             $arr = config('deployment.deploy_config.post-release');
-            $preArr = explode(',', $config_post_release);
+            $preArr = explode('|', $config_post_release);
             $line = '';
             $custom = 'custom_';
             $len = strlen($custom);
@@ -166,7 +166,7 @@ class DeploymentConfigController extends Controller
         });
         $grid->config_post_deploy('部署后命令')->display(function ($config_post_deploy){
             $arr = config('deployment.deploy_config.post-deploy');
-            $preArr = explode(',', $config_post_deploy);
+            $preArr = explode('|', $config_post_deploy);
             $line = '';
             $custom = 'custom_';
             $len = strlen($custom);
@@ -215,27 +215,42 @@ class DeploymentConfigController extends Controller
      */
     protected function form()
     {
-        $branchArr = config('deployment.deploy_config');
         $form = new Form(new DeploymentConfig);
-        $form->text('config_name', '配置名称[name]')->placeholder('输入配置环境名称')->rules('required|min:3');
-        $form->select('config_env', '部署环境[env]')->options($branchArr['task_env'])->placeholder('请选择部署环境');
-        $form->text('config_user', '执行用户[user]')->placeholder('输入目标主机权限用户名')->rules('required|min:1');
-        $form->text('config_from', '部署源路径[from]')->placeholder('输入部署文件所在路径')->rules('required|min:2');
-        $form->text('config_host_path', '部署目标主机路径[host]')->placeholder('输入部署主机文件所在路径')->rules('required|min:3');
-        $form->text('config_releases', '部署策略[release]')->placeholder('输入部署主机保留的版本数')->rules('required|min:1');
-        $form->text('config_exlude', '排除源路径下文件/目录[exclude]')->placeholder('输入部署时排除的文件/目录')->rules('required|min:3');
-        $form->text('config_hosts', '部署主机名/ip[hosts]')->placeholder('输入部署的主机列表(多个主机用,分割)')->rules('required|min:3');
-        $form->checkbox('config_pre_deploy', '部署前执行的任务[可选:pre-deploy]')->options($branchArr['pre-deploy'])->placeholder('输入部署前该阶段执行的任务(多个任务用,分割)');
-        $form->text('customize_pre_deploy', '部署前执行的任务[自定义:pre-deploy]')->placeholder('输入自定义执行的任务(多个任务用,分割)');
-        $form->checkbox('config_on_deploy', '部署时执行的任务[on-deploy]')->options($branchArr['on-deploy'])->placeholder('输入部署时该阶段执行的任务(多个任务用,分割)');
-        $form->text('customize_on_deploy', '部署时执行的任务[自定义:on-deploy]')->placeholder('输入自定义执行的任务(多个任务用,分割)');
-        $form->checkbox('config_on_release', '发布时执行的任务[on-release]')->options($branchArr['on-release'])->placeholder('输入部署主机发布时执行的任务(多个任务用,分割)）');
-        $form->text('customize_on_release', '发布时执行的任务[自定义:on-release]')->placeholder('输入自定义执行的任务(多个任务用,分割)');
-        $form->checkbox('config_post_release', '发布后执行的任务[post-release]')->options($branchArr['post-release'])->placeholder('输入部署主机发布后执行的任务(多个任务用,分割)');
-        $form->text('customize_post_release', '发布后执行的任务[自定义:post-release]')->placeholder('输入自定义执行的任务(多个任务用,分割)');
-        $form->checkbox('config_post_deploy', '部署后执行的任务[post-deploy]')->options($branchArr['post-deploy'])->placeholder('输入部署后执行的任务(多个任务用,分割)');
-        $form->text('customize_post_deploy', '部署后执行的任务[自定义:post-deploy]')->placeholder('输入自定义执行的任务(多个任务用,分割)');
+        $form->disableReset();
+        $form->tab('配置基本项', function ($form) {
+            $branchArr = config('deployment.deploy_config');
+            $form->text('config_name', '配置名称')->placeholder('输入配置环境名称')->rules('required|min:3');
+            $form->select('config_env', '部署环境')->options($branchArr['task_env'])->placeholder('请选择部署环境');
+            $form->text('config_user', '权限用户')->placeholder('输入目标主机权限用户名')->rules('required|min:1');
+            $form->select('config_branch', '发布分支')->options($branchArr['task_branch'])->placeholder('选择部署分支');
+            $form->text('config_from', '源路径')->placeholder('输入部署文件所在路径')->rules('required|min:2');
+            $form->text('config_host_path', '目标主机路径')->placeholder('输入部署主机文件所在路径')->rules('required|min:3');
+            $form->text('config_releases', '部署策略')->placeholder('输入部署主机保留的版本数')->rules('required|min:1');
+            $form->text('config_exlude', '非部署目录/文件')->placeholder('输入部署时排除的文件/目录')->rules('required|min:3');
+            $form->text('config_hosts', '部署主机')->placeholder('输入部署的主机列表(多个主机用|分割)')->rules('required|min:3');
+        })->tab('pre-deploy阶段任务', function ($form) {
+            $branchArr = config('deployment.deploy_config');
+            $form->checkbox('config_pre_deploy', '[可选]')->options($branchArr['pre-deploy'])->placeholder('输入部署前该阶段执行的任务(多个任务用|分割)');
+            $form->text('customize_pre_deploy', '[自定义]')->placeholder('输入自定义执行的任务(多个任务用|分割)');
+        })->tab('on-deploy阶段任务', function ($form) {
+            $branchArr = config('deployment.deploy_config');
+            $form->checkbox('config_on_deploy', '[可选]')->options($branchArr['on-deploy'])->placeholder('输入部署时该阶段执行的任务(多个任务用|分割)');
+            $form->text('customize_on_deploy', '[自定义]')->placeholder('输入自定义执行的任务(多个任务用|分割)');
+        })->tab('on-release阶段任务', function ($form) {
+            $branchArr = config('deployment.deploy_config');
+            $form->checkbox('config_on_release', '[可选]')->options($branchArr['on-release'])->placeholder('输入部署主机发布时执行的任务(多个任务用|分割)）');
+            $form->text('customize_on_release', '[自定义]')->placeholder('输入自定义执行的任务(多个任务用|分割)');
 
+        })->tab('post-release阶段任务', function ($form) {
+            $branchArr = config('deployment.deploy_config');
+            $form->checkbox('config_post_release', '[可选]')->options($branchArr['post-release'])->placeholder('输入部署主机发布后执行的任务(多个任务用|分割)');
+            $form->text('customize_post_release', '[自定义]')->placeholder('输入自定义执行的任务(多个任务用|分割)');
+
+        })->tab('post-deploy阶段任务', function ($form) {
+            $branchArr = config('deployment.deploy_config');
+            $form->checkbox('config_post_deploy', '[可选]')->options($branchArr['post-deploy'])->placeholder('输入部署后执行的任务(多个任务用|分割)');
+            $form->text('customize_post_deploy', '[自定义]')->placeholder('输入自定义执行的任务(多个任务用|分割)');
+        });
 
         // 表单写入前判断
         $form->saving(function (Form $form){
