@@ -149,7 +149,6 @@ class DeployController extends Controller
             exit;
         }
 
-        $path = '/data0/task/www'; // 获取项目路径
         chdir($config_path);
         Log::info('now the path== '.getcwd());
         $cmd = [$vendorMageBin, 'deploy', $env_name];
@@ -183,7 +182,7 @@ class DeployController extends Controller
         }
         // 切割参数
         $ids = [];
-        list($ids['taskId'], $ids['deployParamId'], $ids['releaseId']) = explode('-', $releaseId);
+        list($ids['taskId'], $ids['envId'], $ids['branchId'], $ids['configId'], $ids['releaseId']) = explode('-', $releaseId);
         if (empty($ids) || empty($ids['taskId']) || empty($ids['releaseId']) || strlen($ids['releaseId']) !== self::RELEASE_ID_LEN) {
             header('Cache-control: private, must-revalidate');
             echo "<script>alert('回滚参数有误，请检查.');location.href='".$_SERVER["HTTP_REFERER"]."';</script>";
@@ -192,10 +191,10 @@ class DeployController extends Controller
 
         $this->currentOp = 'rollback';
         $taskBranchArr = config('deployment.deploy_config.task_branch');
-        $taskEnvArr = config('deployment.task_env');
+        $taskEnvArr = config('deployment.deploy_config.task_env');
 
-        $selTaskBranch = $taskBranchArr[$ids['deployParamId']];
-        $env_name = $selTaskBranch;
+        $branchName = $taskBranchArr[$ids['branchId']];
+        $env_name = $taskEnvArr[$ids['envId']];
 
         $taskId = $ids['taskId'];
         $vendorMageBin = base_path().'/vendor/bin/mage';
@@ -204,10 +203,15 @@ class DeployController extends Controller
             exit;
         }
 
-        $mageConfigFile = rtrim(config_path(), '/').'/mage/'.$env_name.'.mage.yml';
-        $cmd = [$vendorMageBin, 'releases:rollback', $env_name, $ids['releaseId'], $mageConfigFile];
-
+        $info = DeploymentConfig::where('id', $ids['configId'])->first();
+        $config_path = $info->config_from;
+//        $config_env = $info->config_env;
+//        $config_branch = $info->config_branch;
+        chdir($config_path);
+        Log::info('now the path== '.getcwd());
+        $cmd = [$vendorMageBin, 'releases:rollback', $env_name, $ids['releaseId']];
         $res = $this->doShellCmd($cmd);
+
         $release_status = 2; // 执行失败
         if ($res) { // 执行成功
             $release_status = 1;
