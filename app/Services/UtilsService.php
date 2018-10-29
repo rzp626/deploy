@@ -88,15 +88,16 @@ class UtilsService
             Log::info('the config params is wrong.check it.');
             return false;
         }
+        Log::info('the ret '.print_r($configItem));
         extract($configItem);
-        Log::info('Start to generate the mage.yml file.');
+
         $deployConfigArr = config('deployment');
         $tmplFields = $deployConfigArr['yml_map_fields'];
         $tmpl = $deployConfigArr['yml_template'];
         $deployConfig = $deployConfigArr['deploy_config'];
         $config_env = $deployConfig['task_env'][$config_env];
         $common_items = $deployConfigArr['common_mage_yml'];
-
+        $log_dir = $deployConfig['log_dir'];
         $mageYmlFile = [
             'magephp' => [
                 'environments' => [],
@@ -106,51 +107,113 @@ class UtilsService
         Log::info('tmp:'.print_r($tmpl, true));
         $split = '|';
         $customStr = 'custom_';
-        $mageYmlFile['magephp']['environments'][$config_env] = $common_items;
-        foreach ($tmpl as $key => $value) {
-            Log::info('magephp'.print_r($mageYmlFile, true));
-            if (isset($tmplFields[$key])) {
-                $tmpArr = explode('|', $tmplFields[$key]);
-                if ($tmpArr[1] == 'normal') {
-                    $mageYmlFile['magephp']['environments'][$config_env][$key] = ${$tmpArr[0]};
-                } else if ($tmpArr[1] == 'map') {
-                    $mageYmlFile['magephp']['environments'][$config_env][$key] = $deployConfig['task_branch'][${$tmpArr[0]}];
-                } else if ($tmpArr[1] == 'int') {
-                    $mageYmlFile['magephp']['environments'][$config_env][$key] = (int)${$tmpArr[0]};
-                } else if ($tmpArr[1] == 'array') {
-                    if (is_string(${$tmpArr[0]})) {
-                        if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
-                            $mageYmlFile['magephp']['environments'][$config_env][$key] = '';
-                        } else {
-                            $mageYmlFile['magephp']['environments'][$config_env][$key] = explode($split, trim(${$tmpArr[0]}, "'"));
-                        }
-                    } else if (is_array(${$tmpArr[0]})) {
-                        $customArr = $builInArr= [];
-                        foreach (${$tmpArr[0]} as $k => $v) {
-                            if (strpos($v, $customStr) !== false) {
-                                $string = substr($v, strlen($customStr));
-                                $tmpV = explode($split, $string);
-                                $cnt = count($tmpV);
-                                for ($i = 0; $i < $cnt; $i++) {
-                                    $customArr[] = $tmpV[$i];
-                                }
+//        $mageYmlFile['magephp']['environments'][$config_env] = $common_items;
+        $mageYmlFile['magephp']['environments'][$config_env] = [];
+        $mageYmlFile['magephp']['log_dir'] = $log_dir;
+
+
+        $ymlFile = rtrim($config_from, '/').'/.mage.yml';
+        if (!file_exists($ymlFile)) {
+            foreach ($tmpl as $key => $value) {
+                Log::info('magephp'.print_r($mageYmlFile, true));
+                if (isset($tmplFields[$key])) {
+                    $tmpArr = explode('|', $tmplFields[$key]);
+                    if ($tmpArr[1] == 'normal') {
+                        $mageYmlFile['magephp']['environments'][$config_env][$key] = ${$tmpArr[0]};
+                    } else if ($tmpArr[1] == 'const') {
+                        $mageYmlFile['magephp']['environments'][$config_env][$key] = $value;
+                    } else if ($tmpArr[1] == 'map') {
+                        $mageYmlFile['magephp']['environments'][$config_env][$key] = $deployConfig['task_branch'][${$tmpArr[0]}];
+                    } else if ($tmpArr[1] == 'int') {
+                        $mageYmlFile['magephp']['environments'][$config_env][$key] = (int)${$tmpArr[0]};
+                    } else if ($tmpArr[1] == 'array') {
+                        if (is_string(${$tmpArr[0]})) {
+                            if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
+                                $mageYmlFile['magephp']['environments'][$config_env][$key] = '';
                             } else {
-                                Log::info($deployConfig[$key]);
-                                if (isset($deployConfig[$key])) {
+                                $mageYmlFile['magephp']['environments'][$config_env][$key] = explode($split, trim(${$tmpArr[0]}, "'"));
+                            }
+                        } else if (is_array(${$tmpArr[0]})) {
+                            $customArr = $builInArr= [];
+                            foreach (${$tmpArr[0]} as $k => $v) {
+                                if (strpos($v, $customStr) !== false) {
+                                    $string = substr($v, strlen($customStr));
+                                    $tmpV = explode($split, $string);
+                                    $cnt = count($tmpV);
+                                    for ($i = 0; $i < $cnt; $i++) {
+                                        $customArr[] = $tmpV[$i];
+                                    }
+                                } else {
                                     Log::info($deployConfig[$key]);
-                                    $builInArr[] = $deployConfig[$key][$v];
+                                    if (isset($deployConfig[$key])) {
+                                        Log::info($deployConfig[$key]);
+                                        $builInArr[] = $deployConfig[$key][$v];
+                                    }
+                                }
+                            }
+                            $mageYmlFile['magephp']['environments'][$config_env][$key] = array_merge($builInArr, $customArr);
+                        }
+                    }
+                }
+                Log::info('magephp'.print_r($mageYmlFile, true));
+            }
+            $yaml = preg_replace("/'/", '', Yaml::dump($mageYmlFile, 5, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+            file_put_contents($ymlFile, $yaml); // 写如到对应的文件中的image中
+            return true;
+        } else {
+            $info = Yaml::parseFile($ymlFile);
+            if (isset($info) && !empty($info)) {
+                foreach ($info as $rootMage => $configArr) {  // 一位大数组
+                    foreach ($configArr as $item => $v) { // 二级配置项
+                        if ($item == 'environments') { // 实际的配置项目
+                            foreach ($tmpl as $key => $value) {
+                                if (isset($tmplFields[$key])) {
+                                    $tmpArr = explode('|', $tmplFields[$key]);
+                                    if ($tmpArr[1] == 'normal') {
+                                        $info[$rootMage][$item][$config_env][$key] = ${$tmpArr[0]};
+                                    } else if ($tmpArr[1] == 'const') {
+                                        $info[$rootMage][$item][$config_env][$key] = $value;
+                                    } else if ($tmpArr[1] == 'map') {
+                                        $info[$rootMage][$item][$config_env][$key] = $deployConfig['task_branch'][${$tmpArr[0]}];
+                                    } else if ($tmpArr[1] == 'int') {
+                                        $info[$rootMage][$item][$config_env][$key] = (int)${$tmpArr[0]};
+                                    } else if ($tmpArr[1] == 'array') {
+                                        if (is_string(${$tmpArr[0]})) {
+                                            if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
+                                                $info[$rootMage][$item][$config_env][$key] = '';
+                                            } else {
+                                                $info[$rootMage][$item][$config_env][$key] = explode($split, trim(${$tmpArr[0]}, "'"));
+                                            }
+                                        } else if (is_array(${$tmpArr[0]})) {
+                                            $customArr = $builInArr= [];
+                                            foreach (${$tmpArr[0]} as $k => $v) {
+                                                if (strpos($v, $customStr) !== false) {
+                                                    $string = substr($v, strlen($customStr));
+                                                    $tmpV = explode($split, $string);
+                                                    $cnt = count($tmpV);
+                                                    for ($i = 0; $i < $cnt; $i++) {
+                                                        $customArr[] = $tmpV[$i];
+                                                    }
+                                                } else {
+                                                    Log::info($deployConfig[$key]);
+                                                    if (isset($deployConfig[$key])) {
+                                                        Log::info($deployConfig[$key]);
+                                                        $builInArr[] = $deployConfig[$key][$v];
+                                                    }
+                                                }
+                                            }
+                                            $info[$rootMage][$item][$config_env][$key] = array_merge($builInArr, $customArr);
+                                        }
+                                    }
                                 }
                             }
                         }
-                        $mageYmlFile['magephp']['environments'][$config_env][$key] = array_merge($builInArr, $customArr);
                     }
                 }
             }
-            Log::info('magephp'.print_r($mageYmlFile, true));
+            $yaml = preg_replace("/'/", '', Yaml::dump($info, 5, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+            file_put_contents($ymlFile, $yaml); // 写如到对应的文件中的image中
+            return true;
         }
-
-        $yaml = preg_replace("/'/", '', Yaml::dump($mageYmlFile, 5, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
-        Log::info('the yaml content: '.print_r($yaml, true));
-        file_put_contents(config_path() . '/mage/'.$config_env.'.mage.yml', $yaml);
     }
 }

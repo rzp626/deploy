@@ -9,8 +9,10 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
+use function foo\func;
 use Illuminate\Support\MessageBag;
 use App\Services\UtilsService;
+use App\DeploymentConfig;
 
 class DeploymentTaskController extends Controller
 {
@@ -88,32 +90,34 @@ class DeploymentTaskController extends Controller
     {
         $grid = new Grid(new DeploymentTask);
         $grid->model()->orderBy('id', 'desc');
-        $grid->id('任务Id')->sortable();
-        $grid->task_name('任务名称');
-        $grid->task_description('任务描述');
-        $grid->task_branch('发布分支')->display(function ($task_branch) {
-            $branchArr = config('deployment.deploy_config.task_branch');
-            if (isset($branchArr[$task_branch])) {
-                return $branchArr[$task_branch].'分支';
-            }
-        });
-
-        $grid->task_env('分布环境')->display(function ($task_env) {
+        $grid->id('Id')->sortable();
+        $grid->task_name('项目ID');
+        $grid->task_description('任务名称');
+        $grid->task_env('发布环境')->display(function ($task_env) {
             $envArr = config('deployment.deploy_config.task_env');
             if (isset($envArr[$task_env])) {
                 return $envArr[$task_env].'环境';
             }
         });
 
-        $grid->created_at('创建日期');
-        $grid->updated_at('修改日期');
+        $grid->task_branch('选取分支')->display(function ($task_branch) {
+            $branchArr = config('deployment.deploy_config.task_branch');
+            if (isset($branchArr[$task_branch])) {
+                return $branchArr[$task_branch].'分支';
+            }
+        });
+
+        $grid->created_at('上线时间');
+//        $grid->updated_at('修改日期');
 
         $grid->actions(function (Grid\Displayers\Actions $actions) {
 
             $status = $actions->row->task_status;
             $taskId = $actions->row->id;
-            $deployId = $actions->row->task_env;
-            $id = $taskId.'-'.$deployId;
+            $env_id = $actions->row->task_env;
+            $branch_id = $actions->row->task_branch;
+            $config_id = $actions->row->task_name;
+            $id = $taskId.'-'.$env_id.'-'.$branch_id.'-'.$config_id;
             $releaseId = $actions->row->release_id;
             $rollbackId = $id.'-'.$releaseId;
             $releaseStatus = $actions->row->release_status;
@@ -155,8 +159,8 @@ class DeploymentTaskController extends Controller
         $grid->filter(function ($filter) {
             $filter->like('task_name', '任务名称');
             $filter->like('task_description', '任务描述');
-            $filter->equal('task_branch', '发布分支')->select([0 => 'master分支', 1 => 'test分支', 2 => 'develop分支']);
             $filter->equal('task_env', '发布环境')->select([0 => '生产环境', 1 => '测试环境', 2 => '开发环境']);
+            $filter->equal('task_branch', '发布分支')->select([0 => 'master分支', 1 => 'test分支', 2 => 'develop分支']);
             $filter->between('created_at', '创建日期')->datetime();
         });
 
@@ -194,15 +198,14 @@ class DeploymentTaskController extends Controller
     {
         $form = new Form(new DeploymentTask);
 
-        $form->text('task_name', '任务名称')->rules('required|min:3');
-        $form->textarea('task_description', '任务描述');
-        $branchArr = config('deployment.deploy_config.task_branch');
-        $form->select('task_branch', '发布分支')->options($branchArr);
+        $form->select('task_name', '项目名')->options(DeploymentConfig::getConfigInfo());
+        $form->text('task_description', '任务名称')->rules('required|min:3');
         $envArr = config('deployment.deploy_config.task_env');
-        $form->select('task_env', '分布环境')->options($envArr);
-
+        $form->select('task_env', '部署环境')->options($envArr);
+        $branchArr = config('deployment.deploy_config.task_branch');
+        $form->select('task_branch', '选取分支')->options($branchArr);
         $form->hidden('task_status')->default(1);
-
+//        $form->select('task_env', '部署环境1')->options(DeploymentTask::getRelationInfo());
 
         $form->saving(function (Form $form) {
             $error = [];
@@ -211,12 +214,13 @@ class DeploymentTaskController extends Controller
                     'title' => '操作失败',
                     'message' => '检查所填写的参数',
                 ]);
-            } else if ($form->input('task_branch') !== $form->input('task_env')) {
-                $error = new MessageBag([
-                    'title' => '添加任务有误',
-                    'message' => '请检查所选择分支与环境是否一致',
-                ]);
             }
+//            } else if ($form->input('task_branch') !== $form->input('task_env')) {
+//                $error = new MessageBag([
+//                    'title' => '添加任务有误',
+//                    'message' => '请检查所选择分支与环境是否一致',
+//                ]);
+//            }
             if (!empty($error)) {
                 return back()->with(compact('error'));
             }

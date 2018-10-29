@@ -85,102 +85,26 @@ class DeploymentConfigController extends Controller
     {
         $grid = new Grid(new DeploymentConfig);
         $grid->model()->orderBy('id', 'desc');
-        $grid->id('配置id')->sortabled();
-        $grid->config_name('配置名');
+        $grid->id('ID')->sortabled();
+        $grid->config_name('项目名');
         $grid->config_env('配置环境')->display(function ($config_env) {
             $arr = config('deployment.deploy_config.task_env');
             if (isset($arr[$config_env])) {
                 return $arr[$config_env].'环境';
             }
+
+            return '';
         });
-        $grid->config_user('权限用户');
-        $grid->config_from('部署源');
-        $grid->config_host_path('目标路径');
-        $grid->config_releases('版本数量');
-        $grid->config_exlude('排除部署目录');
-        $grid->config_hosts('部署主机');
-        $grid->config_pre_deploy('部署前命令')->display(function ($config_pre_deploy) {
-            $arr = config('deployment.deploy_config.pre-deploy');
-            $preArr = explode('|', $config_pre_deploy);
-            $line = '';
-            $custom = 'custom_';
-            $len = strlen($custom);
-            foreach ($preArr as $key => $value) {
-                if (strpos($value, $custom) === false && isset($arr[$value])) {
-                    $line .= $arr[$value] . '&';
-                } else if (($pos = strpos($value, $custom)) !== false) {
-                    $line .= substr($value, $len).'&';
-                }
+        $grid->config_branch('选取分支')->display(function ($config_branch) {
+            $arr = config('deployment.deploy_config.task_branch');
+            if (isset($arr[$config_branch])) {
+                return $arr[$config_branch].'分支';
             }
 
-            return rtrim($line, '&');
+            return '';
         });
 
-        $grid->config_on_deploy('部署时命令')->display(function ($config_on_deploy) {
-            $arr = config('deployment.deploy_config.on-deploy');
-            $preArr = explode(',', $config_on_deploy);
-            $line = '';
-            $custom = 'custom_';
-            $len = strlen($custom);
-            foreach ($preArr as $key => $value) {
-                if (strpos($value, $custom) === false && isset($arr[$value])) {
-                    $line .= $arr[$value] . '&';
-                } else if (strpos($value, $custom) !== false) {
-                    $line .= substr($value, $len).'&';
-                }
-            }
-
-            return rtrim($line, '&');
-        });
-        $grid->config_on_release('发布时命令')->display(function ($config_on_release) {
-            $arr = config('deployment.deploy_config.on-release');
-            $preArr = explode('|', $config_on_release);
-            $line = '';
-            $custom = 'custom_';
-            $len = strlen($custom);
-            foreach ($preArr as $key => $value) {
-                if (strpos($value, $custom) === false && isset($arr[$value])) {
-                    $line .= $arr[$value] . '&';
-                } else if (strpos($value, $custom) !== false) {
-                    $line .= substr($value, $len).'&';
-                }
-            }
-
-            return rtrim($line, '&');
-        });
-        $grid->config_post_release('发布后命令')->display(function ($config_post_release){
-            $arr = config('deployment.deploy_config.post-release');
-            $preArr = explode('|', $config_post_release);
-            $line = '';
-            $custom = 'custom_';
-            $len = strlen($custom);
-            foreach ($preArr as $key => $value) {
-                if (strpos($value, $custom) === false && isset($arr[$value])) {
-                    $line .= $arr[$value] . '&';
-                } else if (strpos($value, $custom) !== false) {
-                    $line .= substr($value, $len).'&';
-                }
-            }
-
-            return rtrim($line, '&');
-        });
-        $grid->config_post_deploy('部署后命令')->display(function ($config_post_deploy){
-            $arr = config('deployment.deploy_config.post-deploy');
-            $preArr = explode('|', $config_post_deploy);
-            $line = '';
-            $custom = 'custom_';
-            $len = strlen($custom);
-            foreach ($preArr as $key => $value) {
-                if (strpos($value, $custom) === false && isset($arr[$value])) {
-                    $line .= $arr[$value] . '&';
-                } else if (strpos($value, $custom) !== false) {
-                    $line .= substr($value, $len).'&';
-                }
-            }
-
-            return rtrim($line, '&');
-        });
-        $grid->updated_at('操作时间');
+        $grid->updated_at('创建时间');
 
         $grid->tools(function ($tools) {
             $tools->batch(function ($batch) {
@@ -219,10 +143,10 @@ class DeploymentConfigController extends Controller
         $form->disableReset();
         $form->tab('配置基本项', function ($form) {
             $branchArr = config('deployment.deploy_config');
-            $form->text('config_name', '配置名称')->placeholder('输入配置环境名称')->rules('required|min:3');
+            $form->text('config_name', '项目名')->placeholder('输入配置环境名称')->rules('required|min:3');
             $form->select('config_env', '部署环境')->options($branchArr['task_env'])->placeholder('请选择部署环境');
             $form->text('config_user', '权限用户')->placeholder('输入目标主机权限用户名')->rules('required|min:1');
-            $form->select('config_branch', '发布分支')->options($branchArr['task_branch'])->placeholder('选择部署分支');
+            $form->select('config_branch', '选取分支')->options($branchArr['task_branch'])->placeholder('选择部署分支');
             $form->text('config_from', '源路径')->placeholder('输入部署文件所在路径')->rules('required|min:2');
             $form->text('config_host_path', '目标主机路径')->placeholder('输入部署主机文件所在路径')->rules('required|min:3');
             $form->text('config_releases', '部署策略')->placeholder('输入部署主机保留的版本数')->rules('required|min:1');
@@ -382,6 +306,10 @@ class DeploymentConfigController extends Controller
 
         // 成功写表后的操作, 生产magephp部署的配置文件
         $form->saved(function (Form $form) {
+            $id = $form->model()->id; // 获取对应模型的id
+//            echo "<pre>";
+//            var_dump($form, $id);
+//            die;
             $retry_time = 3;
             while ($retry_time) {
                 //var_dump(request()->all(), $form->input(null));

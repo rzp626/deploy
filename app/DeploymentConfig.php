@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\DeploymentTask;
 
 class DeploymentConfig extends Model
 {
@@ -50,5 +51,22 @@ class DeploymentConfig extends Model
 
         public function setConfigPostDeployAttribute($value){
             $this->attributes['config_post_deploy'] =trim(implode(",",$value),',');
+        }
+
+
+        public function deployTask()
+        {
+            return $this->belongsTo(DeploymentTask::class);
+        }
+
+        public static function getConfigInfo()
+        {
+            $options = self::select('id', 'config_name as text')->get();
+            $selection = [];
+            foreach ($options as $k => $v) {
+                $selection[$v->id]    = $v->text;
+            }
+
+            return $selection;
         }
 }

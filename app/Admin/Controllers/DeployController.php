@@ -1,11 +1,13 @@
 <?php
 namespace App\Admin\Controllers;
 
+use App\DeploymentConfig;
 use App\DeploymentTask;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
 use Log;
+use Mage\MageApplication;
 
 class DeployController extends Controller
 {
@@ -117,8 +119,8 @@ class DeployController extends Controller
         }
 
         $params = [];
-        list($params['taskId'], $params['deployParamId']) = explode('-', $id);
-        if (empty($params) || (count($params) !== 2)) {
+        list($params['taskId'], $params['envId'], $params['branchId'], $params['configId']) = explode('-', $id);
+        if (empty($params) || (count($params) !== 4)) {
             header('Cache-control: private, must-revalidate');
             echo "<script>alert('参数有误');location.href='".$_SERVER["HTTP_REFERER"]."';</script>";
             exit;
@@ -128,7 +130,17 @@ class DeployController extends Controller
         $taskBranchArr = config('deployment.deploy_config.task_branch');
         $taskEnvArr = config('deployment.deploy_config.task_env');
 
-        $env_name = $taskBranchArr[$params['deployParamId']];
+        $env_name = $taskEnvArr[$params['envId']];
+        $branch_name = $taskBranchArr[$params['branchId']];
+        $info = DeploymentConfig::where('id', $params['configId'])->first();
+        $config_path = $info->config_from;
+        $config_env = $info->config_env;
+        $config_branch = $info->config_branch;
+//        if ($config_env != $params['envId'] || $config_branch != $params['branchId']) {
+//            header('Cache-control: private, must-revalidate');
+//            echo "<script>alert('参数有误');location.href='".$_SERVER["HTTP_REFERER"]."';</script>";
+//            exit;
+//        }
 
         $taskId = $params['taskId'];
         $vendorMageBin = base_path().'/vendor/bin/mage';
@@ -136,9 +148,13 @@ class DeployController extends Controller
             echo "magephp可执行文件，未发现，请检查.";
             exit;
         }
-        $mageConfigFile = rtrim(config_path(), '/').'/mage/'.$env_name.'.mage.yml';
-        $cmd = [$vendorMageBin, 'deploy', $env_name, $mageConfigFile];
+
+        $path = '/data0/task/www'; // 获取项目路径
+        chdir($config_path);
+        Log::info('now the path== '.getcwd());
+        $cmd = [$vendorMageBin, 'deploy', $env_name];
         $res = $this->doShellCmd($cmd);
+
         $task_status = 3; // 执行失败
         if ($res) { // 执行成功
             $task_status = 2;
@@ -236,6 +252,8 @@ class DeployController extends Controller
 
         $this->sendOutputTo($this->getOutputTo(), $string);
         if (!$process->isSuccessful()) { // deploy 失败，操作失败的提示信息
+//            throw new \RuntimeException($process->getErrorOutput());
+            $this->consoleLog('error: '.json_encode($process->getErrorOutput()));
             $this->consoleLog(json_encode($processCmd).'执行失败。');
             return false;
         }

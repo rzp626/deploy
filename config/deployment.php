@@ -38,6 +38,7 @@ return [
         'post-deploy' => [
             0 => 'deploy/tar/cleanup',
         ],
+        'log_dir' => ' /data0/deploy/logs',
     ],
 
     'filled_fields' => [
@@ -72,7 +73,7 @@ return [
     'yml_map_fields' => [
         'user' => 'config_user|normal',
         'branch' => 'config_branch|map',
-        'from' => 'config_from|normal',
+        'from' => 'config_from|const',
         'host_path' => 'config_host_path|normal',
         'releases' => 'config_releases|int',
         'exclude' => 'config_exlude|array',
@@ -85,13 +86,9 @@ return [
     ],
 
     'yml_template' => [
-        'tar_create' => 'cfh',
-        'tar_create_path' => 'tar',
-        'tar_extract' => 'xf',
-        'tar_extract_path' => 'tar',
         'user' => '',
         'branch' => '',
-        'from' => '',
+        'from' => './',
         'host_path' => '',
         'releases' => '',
         'exclude' => '',
