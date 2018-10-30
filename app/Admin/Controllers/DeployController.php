@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
 use Log;
 use Mage\MageApplication;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class DeployController extends Controller
 {
@@ -69,13 +70,14 @@ class DeployController extends Controller
     protected function getOutputTo()
     {
         if (!$this->releaseId) {
-            $path = 'app/mage/logs/op.output';
+            $path = '/data0/deploy/error/op.output';
         } else {
-            $path = 'app/mage/logs/'.$this->currentOp.'-releaseId-'.$this->releaseId.'.output';
+            $path = '/data0/deploy/opt/'.$this->currentOp.'-releaseId-'.$this->releaseId.'.output';
         }
 
         if (!$this->sendOutputTo) {
-            $this->sendOutputTo = storage_path($path);
+            //$this->sendOutputTo = storage_path($path);
+            $this->sendOutputTo = $path;
         }
 
         return $this->sendOutputTo;
@@ -136,12 +138,6 @@ class DeployController extends Controller
         $config_path = $info->config_from;
         $config_env = $info->config_env;
         $config_branch = $info->config_branch;
-//        if ($config_env != $params['envId'] || $config_branch != $params['branchId']) {
-//            header('Cache-control: private, must-revalidate');
-//            echo "<script>alert('参数有误');location.href='".$_SERVER["HTTP_REFERER"]."';</script>";
-//            exit;
-//        }
-
         $taskId = $params['taskId'];
         $vendorMageBin = base_path().'/vendor/bin/mage';
         if (!file_exists($vendorMageBin)) {
@@ -151,7 +147,8 @@ class DeployController extends Controller
 
         chdir($config_path);
         Log::info('now the path== '.getcwd());
-        $cmd = [$vendorMageBin, 'deploy', $env_name];
+        $phpPath = $this->getBinPath();
+        $cmd = [$phpPath, $vendorMageBin, 'deploy', $env_name];
         $res = $this->doShellCmd($cmd);
 
         $task_status = 3; // 执行失败
@@ -205,11 +202,10 @@ class DeployController extends Controller
 
         $info = DeploymentConfig::where('id', $ids['configId'])->first();
         $config_path = $info->config_from;
-//        $config_env = $info->config_env;
-//        $config_branch = $info->config_branch;
         chdir($config_path);
         Log::info('now the path== '.getcwd());
-        $cmd = [$vendorMageBin, 'releases:rollback', $env_name, $ids['releaseId']];
+        $phpPath = $this->getBinPath();
+        $cmd = [$phpPath, $vendorMageBin, 'releases:rollback', $env_name, $ids['releaseId']];
         $res = $this->doShellCmd($cmd);
 
         $release_status = 2; // 执行失败
@@ -251,12 +247,11 @@ class DeployController extends Controller
                 }
             }
             $string .= $data;
-//            echo nl2br($data);
         }
-
+	
         $this->sendOutputTo($this->getOutputTo(), $string);
+
         if (!$process->isSuccessful()) { // deploy 失败，操作失败的提示信息
-//            throw new \RuntimeException($process->getErrorOutput());
             $this->consoleLog('error: '.json_encode($process->getErrorOutput()));
             $this->consoleLog(json_encode($processCmd).'执行失败。');
             return false;
@@ -273,5 +268,18 @@ class DeployController extends Controller
     {
         echo __CLASS__ . ":" . $str . PHP_EOL;
         Log::info(__CLASS__ . ":" . $str, $logInfo);
+    }
+
+    private function getBinPath()
+    {
+        if (PHP_BINARY) {
+            $sbinPath = PHP_BINARY;
+            $pos = strpos($sbinPath, '/sbin');
+            $phpPath = substr($sbinPath, 0, $pos). '/bin/php';
+        } else {
+            $phpPath = '/usr/local/opt/php@7.1/bin/php'; // 测试bin路径
+        }
+
+        return $phpPath;
     }
 }

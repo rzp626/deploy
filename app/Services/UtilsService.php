@@ -159,6 +159,9 @@ class UtilsService
             }
             $yaml = preg_replace("/'/", '', Yaml::dump($mageYmlFile, 5, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
             file_put_contents($ymlFile, $yaml); // 写如到对应的文件中的image中
+            if (!chmod($ymlFile, 0777)) {
+                Log::info('修改mage.yml文件权限失败，请检查，手动修改777。');
+            }
             return true;
         } else {
             $info = Yaml::parseFile($ymlFile);
@@ -213,6 +216,9 @@ class UtilsService
             }
             $yaml = preg_replace("/'/", '', Yaml::dump($info, 5, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
             file_put_contents($ymlFile, $yaml); // 写如到对应的文件中的image中
+            if (!chmod($ymlFile, 0777)) {
+                Log::info('修改mage.yml文件权限失败，请检查，手动修改777。');
+            }
             return true;
         }
     }
