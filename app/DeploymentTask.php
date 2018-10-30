@@ -4,10 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\DeploymentConfig;
+use DB;
 
 class DeploymentTask extends Model
 {
-    //
+    //max id
+    protected static $mid;
+
     public function deploy_config()
     {
         return $this->hasOne(DeploymentConfig::class);
@@ -24,4 +27,15 @@ class DeploymentTask extends Model
         return $selection;
     }
 
+    public static function getMaxId()
+    {
+        if (!isset(self::$mid)) {
+            $data = self::select(DB::raw('max(id) as mid'))->get();
+            foreach ($data as $k => $v) {
+                self::$mid = $v->mid;
+            }
+        }
+
+        return self::$mid;
+    }
 }

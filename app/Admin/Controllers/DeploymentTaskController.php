@@ -91,7 +91,14 @@ class DeploymentTaskController extends Controller
         $grid = new Grid(new DeploymentTask);
         $grid->model()->orderBy('id', 'desc');
         $grid->id('Id')->sortable();
-        $grid->task_name('项目ID');
+        $grid->task_name('项目名称')->display(function ($task_name) {
+            $info = DeploymentConfig::where('id', $task_name)->first();
+            if (isset($info)) {
+                return  $info->config_name;
+            }
+            return $task_name;
+        });
+
         $grid->task_description('任务名称');
         $grid->task_env('发布环境')->display(function ($task_env) {
             $envArr = config('deployment.deploy_config.task_env');
@@ -127,7 +134,12 @@ class DeploymentTaskController extends Controller
             } else if ($releaseStatus == 2) { // 回滚失败
                 $aLink = '<span class="btn btn-xs btn-danger">回滚失败</span>';
             } else { // 初始状态
-                $aLink = '<span class="btn btn-xs btn-success">发布成功</span>&nbsp;&nbsp;&nbsp;&nbsp;<abbr title="任务回滚" class="initialism"><a href="/admin/rollback/'.$rollbackId.'"> <i class="btn btn-xs btn-facebook fa fa-history" aria-hidden="true"></i></a></abbr>';
+                $maxId = DeploymentTask::getMaxId();
+                if ($taskId == $maxId) {
+                    $aLink = '<span class="btn btn-xs btn-success">发布成功</span>';
+                } else {
+                    $aLink = '<span class="btn btn-xs btn-success">发布成功</span>&nbsp;&nbsp;&nbsp;&nbsp; <a class="btn btn-xs btn-primary grid-refresh"><i class="fa fa-refresh"></i> 回滚</a>';
+                }
             }
 
             if ($status == 1) {
@@ -157,10 +169,6 @@ class DeploymentTaskController extends Controller
         });
 
         $grid->filter(function ($filter) {
-            $filter->like('task_name', '任务名称');
-            $filter->like('task_description', '任务描述');
-            $filter->equal('task_env', '发布环境')->select([0 => '生产环境', 1 => '测试环境', 2 => '开发环境']);
-            $filter->equal('task_branch', '发布分支')->select([0 => 'master分支', 1 => 'test分支', 2 => 'develop分支']);
             $filter->between('created_at', '创建日期')->datetime();
         });
 
@@ -205,8 +213,12 @@ class DeploymentTaskController extends Controller
         $branchArr = config('deployment.deploy_config.task_branch');
         $form->select('task_branch', '选取分支')->options($branchArr);
         $form->hidden('task_status')->default(1);
-//        $form->select('task_env', '部署环境1')->options(DeploymentTask::getRelationInfo());
 
+        $form->tools(function (Form\Tools $tools) {
+            // 去掉返回按钮
+            $tools->disableBackButton();
+        });
+        $form->disableReset();
         $form->saving(function (Form $form) {
             $error = [];
             if (empty($form->input('task_name'))) {
