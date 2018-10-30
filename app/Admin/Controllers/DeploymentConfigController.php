@@ -127,8 +127,6 @@ class DeploymentConfigController extends Controller
     {
         $show = new Show(DeploymentConfig::findOrFail($id));
 
-
-
         return $show;
     }
 
