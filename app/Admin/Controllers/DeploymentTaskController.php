@@ -138,7 +138,7 @@ class DeploymentTaskController extends Controller
                 if ($taskId == $maxId) {
                     $aLink = '<span class="btn btn-xs btn-success">发布成功</span>';
                 } else {
-                    $aLink = '<span class="btn btn-xs btn-success">发布成功</span>&nbsp;&nbsp;&nbsp;&nbsp; <a class="btn btn-xs btn-primary grid-refresh"><i class="fa fa-refresh"></i> 回滚</a>';
+                    $aLink = '<span class="btn btn-xs btn-success">发布成功</span>&nbsp;&nbsp;&nbsp;&nbsp; <a  href="/admin/rollback/'.$rollbackId.'" class="btn btn-xs btn-primary grid-refresh"><i class="fa fa-refresh"></i> 回滚</a>';
                 }
             }
 
