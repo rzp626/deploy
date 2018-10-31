@@ -282,4 +282,55 @@ class DeployController extends Controller
 
         return $phpPath;
     }
+
+    /**
+     * 根据configId获取选择环境
+     *
+     * @param Request $request
+     * @return mixed
+     */
+    public function selectEnv(Request $request)
+    {
+        $configId = $request->get('q');
+        $data = DeploymentConfig::getConfigData( $configId);
+        $taskEnvArr = config('deployment.deploy_config.task_env');
+        $arr = [];
+        $arr[0]['id'] = $data['id'].'-'.$data['config_env'];
+        $arr[0]['text'] = $taskEnvArr[$data['config_env']];
+
+        return $arr;
+    }
+
+    /**
+     * 根据configId获取选择分支
+     *
+     * @param Request $request
+     * @return mixed
+     */
+    public function selectBranch(Request $request)
+    {
+        $env = $request->get('q');
+        $params = [];
+        list($params['configId'], $params['envId']) = explode('-', $env);
+        $taskBranchArr = config('deployment.deploy_config.task_branch');
+        $data = DeploymentConfig::getConfigData($params['configId']);
+        $arr = [];
+        $arr[0]['id'] = $data['config_branch'];
+        $arr[0]['text'] = $taskBranchArr[$data['config_branch']];
+        return $arr;
+    }
+
+    public function selectConfigName()
+    {
+        $options = DeploymentConfig::select('id', 'config_name as text')->orderBy('id', 'desc')->get();
+        $selection = [];
+        $i = 0;
+        foreach ($options as $k => $v) {
+            $selection[$i]['id']    = $v->id;
+            $selection[$i]['text']    = $v->text;
+            $i++;
+        }
+
+        return $selection;
+    }
 }

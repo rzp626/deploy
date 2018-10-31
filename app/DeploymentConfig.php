@@ -35,38 +35,43 @@ class DeploymentConfig extends Model
 
 
     public function setConfigPreDeployAttribute($value){
-            $this->attributes['config_pre_deploy'] =trim(implode(",",$value),',');
+        $this->attributes['config_pre_deploy'] =trim(implode(",",$value),',');
+    }
+
+    public function setConfigOnDeployAttribute($value){
+        $this->attributes['config_on_deploy'] =trim(implode(",",$value),',');
+    }
+
+    public function setConfigOnReleaseAttribute($value){
+        $this->attributes['config_on_release'] =trim(implode(",",$value),',');
+    }
+    public function setConfigPostReleaseAttribute($value){
+        $this->attributes['config_post_release'] =trim(implode(",",$value),',');
+    }
+
+    public function setConfigPostDeployAttribute($value){
+        $this->attributes['config_post_deploy'] =trim(implode(",",$value),',');
+    }
+
+
+    public function deployTask()
+    {
+        return $this->belongsTo(DeploymentTask::class);
+    }
+
+    public static function getConfigInfo()
+    {
+        $options = self::select('id', 'config_name as text')->get();
+        $selection = [];
+        foreach ($options as $k => $v) {
+            $selection[$v->id]    = $v->text;
         }
 
-        public function setConfigOnDeployAttribute($value){
-            $this->attributes['config_on_deploy'] =trim(implode(",",$value),',');
-        }
+        return $selection;
+    }
 
-        public function setConfigOnReleaseAttribute($value){
-            $this->attributes['config_on_release'] =trim(implode(",",$value),',');
-        }
-        public function setConfigPostReleaseAttribute($value){
-            $this->attributes['config_post_release'] =trim(implode(",",$value),',');
-        }
-
-        public function setConfigPostDeployAttribute($value){
-            $this->attributes['config_post_deploy'] =trim(implode(",",$value),',');
-        }
-
-
-        public function deployTask()
-        {
-            return $this->belongsTo(DeploymentTask::class);
-        }
-
-        public static function getConfigInfo()
-        {
-            $options = self::select('id', 'config_name as text')->get();
-            $selection = [];
-            foreach ($options as $k => $v) {
-                $selection[$v->id]    = $v->text;
-            }
-
-            return $selection;
-        }
+    public static function getConfigData($id)
+    {
+        return self::find($id, ['id', 'config_name', 'config_env', 'config_branch']);
+    }
 }

@@ -126,7 +126,14 @@ class DeploymentConfigController extends Controller
     protected function detail($id)
     {
         $show = new Show(DeploymentConfig::findOrFail($id));
-
+        $show->config_name('项目名');
+        $show->config_env('部署环境');
+        $show->config_user('权限用户');
+        $show->config_branch('选取分支');
+        $show->config_from('源路径');
+        $show->config_host_path('目标主机路径');
+        $show->config_exlude('非部署目录');
+        $show->config_hosts('部署主机');
         return $show;
     }
 

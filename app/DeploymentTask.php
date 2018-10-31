@@ -13,8 +13,12 @@ class DeploymentTask extends Model
 
     public function deploy_config()
     {
-        return $this->hasOne(DeploymentConfig::class);
+        return $this->hasOne('App\DeploymentConfig', 'id', 'task_name');
     }
+
+//    public function setTaskEnvAttribute($value){
+//        $this->attributes['task_env'] =trim(implode(",",$value),',');
+//    }
 
     public static function getRelationInfo()
     {
