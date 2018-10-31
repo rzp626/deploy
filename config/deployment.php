@@ -18,25 +18,23 @@ return [
             3 => 'sendbox',
         ],
         'pre-deploy' => [
-            0 => 'git/change-branch',
-            1 => 'git/update',
-            2 => 'composer/install',
-            3 => 'composer/dump-autoload',
-            4 => 'composer/self-update',
-            5 => 'deploy/tar/prepare',
+//            0 => 'git/change-branch',
+            1 => 'composer/install',
+            2 => 'composer/dump-autoload',
+            3 => 'deploy/tar/prepare',
         ],
         'on-deploy' => [
-            0 => 'deploy/release/prepare',
-            1 => 'deploy/tar/copy',
+            1 => 'deploy/release/prepare',
+            2 => 'deploy/tar/copy',
         ],
         'on-release' => [
-            0 => 'deploy/release',
+            1 => 'deploy/release',
         ],
         'post-release' => [
-            0 => 'deploy/release/cleanup',
+            1 => 'deploy/release/cleanup',
         ],
         'post-deploy' => [
-            0 => 'deploy/tar/cleanup',
+            1 => 'deploy/tar/cleanup',
         ],
         'log_dir' => ' /data0/deploy/logs',
     ],
@@ -98,6 +96,23 @@ return [
         'on-release' => '',
         'post-release' => '',
         'post-deploy' => '',
+    ],
+
+    'custom_field' => [
+        'custom_pre_deploy' => 'config_pre_deploy',
+        'custom_on_deploy' => 'config_on_deploy',
+        'custom_on_release' => 'config_on_release',
+        'custom_post_release' => 'config_post_release',
+        'custom_post_deploy' => 'config_post_deploy',
+    ],
+
+    'init_map_field' => [
+        'config_pre_deploy' => 'pre-deploy',
+        'config_on_deploy' => 'on-deploy',
+        'config_on_release' => 'on-release',
+        'config_post_release' => 'post-release',
+        'config_post_deploy' => 'post-deploy',
+        'config_hosts' => 'config_hosts',
     ],
 ];
 

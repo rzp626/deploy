@@ -35,24 +35,50 @@ class DeploymentConfig extends Model
 
 
     public function setConfigPreDeployAttribute($value){
-        $this->attributes['config_pre_deploy'] =trim(implode(",",$value),',');
+        $this->attributes['config_pre_deploy'] =trim(implode("|",$value),',');
     }
 
     public function setConfigOnDeployAttribute($value){
-        $this->attributes['config_on_deploy'] =trim(implode(",",$value),',');
+        $this->attributes['config_on_deploy'] =trim(implode("|",$value),',');
     }
 
     public function setConfigOnReleaseAttribute($value){
-        $this->attributes['config_on_release'] =trim(implode(",",$value),',');
+        $this->attributes['config_on_release'] =trim(implode("|",$value),',');
     }
     public function setConfigPostReleaseAttribute($value){
-        $this->attributes['config_post_release'] =trim(implode(",",$value),',');
+        $this->attributes['config_post_release'] =trim(implode("|",$value),',');
     }
 
     public function setConfigPostDeployAttribute($value){
-        $this->attributes['config_post_deploy'] =trim(implode(",",$value),',');
+        $this->attributes['config_post_deploy'] =trim(implode("|",$value),',');
     }
 
+    public function setCustomPreDeployAttribute($value){
+        $this->attributes['custom_pre_deploy'] =trim(implode("|",$value),',');
+    }
+
+    public function setCustomOnDeployAttribute($value){
+        $this->attributes['custom_on_deploy'] =trim(implode("|",$value),',');
+    }
+
+    public function setCustomOnReleaseAttribute($value){
+        $this->attributes['custom_on_release'] =trim(implode("|",$value),',');
+    }
+    public function setCustomPostReleaseAttribute($value){
+        $this->attributes['custom_post_release'] =trim(implode("|",$value),',');
+    }
+
+    public function setCustomPostDeployAttribute($value){
+        $this->attributes['custom_post_deploy'] =trim(implode("|",$value),',');
+    }
+
+    public function setConfigHostsAttribute($value){
+        $this->attributes['config_hosts'] =trim(implode("|",$value),',');
+    }
+
+    public function setConfigExludeAttribute($value){
+        $this->attributes['config_exlude'] =trim(implode("|",$value),',');
+    }
 
     public function deployTask()
     {

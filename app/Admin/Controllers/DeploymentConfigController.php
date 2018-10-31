@@ -154,37 +154,36 @@ class DeploymentConfigController extends Controller
             $form->select('config_branch', '选取分支')->options($branchArr['task_branch'])->placeholder('选择部署分支');
             $form->text('config_from', '源路径')->placeholder('输入部署文件所在路径')->rules('required|min:2');
             $form->text('config_host_path', '目标主机路径')->placeholder('输入部署主机文件所在路径')->rules('required|min:3');
-            $form->text('config_releases', '部署策略')->placeholder('输入部署主机保留的版本数')->rules('required|min:1');
-            $form->text('config_exlude', '非部署目录/文件')->placeholder('输入部署时排除的文件/目录')->rules('required|min:3');
-            $form->text('config_hosts', '部署主机')->placeholder('输入部署的主机列表(多个主机用|分割)')->rules('required|min:3');
+            $form->text('config_releases', '备份数量')->placeholder('输入部署主机保留的版本数')->rules('required|min:1');
+            $form->textarea('config_exlude', '非部署目录/文件')->placeholder('输入部署时排除的文件/目录')->rows(5)->rules('required|min:3');
+            $form->textarea('config_hosts', '部署主机')->placeholder('一行一主机')->rows(10)->rules('required|min:3');
         })->tab('pre-deploy阶段任务', function ($form) {
             $branchArr = config('deployment.deploy_config');
-            $form->checkbox('config_pre_deploy', '[可选]')->options($branchArr['pre-deploy'])->placeholder('输入部署前该阶段执行的任务(多个任务用|分割)');
-            $form->text('customize_pre_deploy', '[自定义]')->placeholder('输入自定义执行的任务(多个任务用|分割)');
+            $form->checkbox('config_pre_deploy', '[可选]')->options($branchArr['pre-deploy'])->placeholder('输入部署前该阶段执行的任务(多个任务用|分割)')->stacked();
+            $form->textarea('custom_pre_deploy', '[自定义]')->rows(5)->placeholder('输入自定义执行的任务(一行一命令)');
         })->tab('on-deploy阶段任务', function ($form) {
             $branchArr = config('deployment.deploy_config');
-            $form->checkbox('config_on_deploy', '[可选]')->options($branchArr['on-deploy'])->placeholder('输入部署时该阶段执行的任务(多个任务用|分割)');
-            $form->text('customize_on_deploy', '[自定义]')->placeholder('输入自定义执行的任务(多个任务用|分割)');
+            $form->checkbox('config_on_deploy', '[可选]')->options($branchArr['on-deploy'])->placeholder('输入部署时该阶段执行的任务(多个任务用|分割)')->stacked();
+            $form->textarea('custom_on_deploy', '[自定义]')->rows(5)->placeholder('输入自定义执行的任务(一行一命令)');
         })->tab('on-release阶段任务', function ($form) {
             $branchArr = config('deployment.deploy_config');
-            $form->checkbox('config_on_release', '[可选]')->options($branchArr['on-release'])->placeholder('输入部署主机发布时执行的任务(多个任务用|分割)）');
-            $form->text('customize_on_release', '[自定义]')->placeholder('输入自定义执行的任务(多个任务用|分割)');
+            $form->checkbox('config_on_release', '[可选]')->options($branchArr['on-release'])->placeholder('输入部署主机发布时执行的任务(多个任务用|分割)）')->stacked();
+            $form->textarea('custom_on_release', '[自定义]')->rows(5)->placeholder('输入自定义执行的任务(一行一命令)');
 
         })->tab('post-release阶段任务', function ($form) {
             $branchArr = config('deployment.deploy_config');
-            $form->checkbox('config_post_release', '[可选]')->options($branchArr['post-release'])->placeholder('输入部署主机发布后执行的任务(多个任务用|分割)');
-            $form->text('customize_post_release', '[自定义]')->placeholder('输入自定义执行的任务(多个任务用|分割)');
+            $form->checkbox('config_post_release', '[可选]')->options($branchArr['post-release'])->placeholder('输入部署主机发布后执行的任务(多个任务用|分割)')->stacked();
+            $form->textarea('custom_post_release', '[自定义]')->rows(5)->placeholder('输入自定义执行的任务(一行一命令)');
 
         })->tab('post-deploy阶段任务', function ($form) {
             $branchArr = config('deployment.deploy_config');
-            $form->checkbox('config_post_deploy', '[可选]')->options($branchArr['post-deploy'])->placeholder('输入部署后执行的任务(多个任务用|分割)');
-            $form->text('customize_post_deploy', '[自定义]')->placeholder('输入自定义执行的任务(多个任务用|分割)');
+            $form->checkbox('config_post_deploy', '[可选]')->options($branchArr['post-deploy'])->placeholder('输入部署后执行的任务(多个任务用|分割)')->stacked();
+            $form->textarea('custom_post_deploy', '[自定义]')->rows(5)->placeholder('输入自定义执行的任务(一行一命令)');
         });
 
         // 表单写入前判断
         $form->saving(function (Form $form){
             $allFields = $form->input(null);
-            $postData = request()->all();
             $filledFields = config('deployment.filled_fields');
             $initFields = config('deployment.init_fields');
             $filterRes = UtilsService::filterFields($allFields, $filledFields, $initFields);
@@ -196,125 +195,148 @@ class DeploymentConfigController extends Controller
                 return back()->with(compact('error'));
             }
 
+            // 排除目录/文件
+            if ($form->input('config_exlude') && !empty($form->input('config_exlude'))) {
+                $arr = explode("\r\n", $form->input('config_exlude'));
+                $form->input('config_exlude', $arr);
+            }
+
+            // 处理主机
+            if ($form->input('config_hosts') && !empty($form->input('config_hosts'))) {
+                $arr = explode("\r\n", $form->input('config_hosts'));
+                $form->input('config_hosts', $arr);
+            }
+
             // 校验pre-deploy入参 - begin
-            $tmpDeployStr = '';
             $tmpDeployArr = [];
             if (is_array($form->input('config_pre_deploy'))) {
-                foreach ($form->input('config_pre_deploy') as $key => $value) {
-                    if ($value !== null) {
-                        $tmpDeployStr .= $value .'#';
-                        $tmpDeployArr[] = $value;
+                $cnt = count($form->input('config_pre_deploy'));
+                if ($cnt == 1) {
+                    if (null === $form->input('config_pre_deploy')[$cnt - 1]) {
+                        $tmpDeployArr = '';
+                    }
+                } else {
+                    foreach ($form->input('config_pre_deploy') as $key => $value) {
+                        if ($value !== null) {
+                            $tmpDeployArr[] = $value;
+                        }
                     }
                 }
-            }
-            if ($form->input('customize_pre_deploy') !== null) {
-                $tmpDeployStr .= $form->input('customize_pre_deploy') .'#';
-                $tmpDeployArr[] = 'custom_'.$form->input('customize_pre_deploy');
-            }
-            if ($postData['customize_pre_deploy'] !== null) {
-                $tmpDeployArr[] = 'custom_'.$postData['customize_pre_deploy'];
             }
 
             $form->input('config_pre_deploy', $tmpDeployArr);
+            if (null === $form->input('custom_pre_deploy')) {
+                $form->input('custom_pre_deploy', '');
+            } else {
+                $arr = explode("\r\n", $form->input('custom_pre_deploy'));
+                $form->input('custom_pre_deploy', $arr);
+            }
             // 校验pre-deploy入参 - end
 
             // 校验on-deploy入参 - begin
-            $tmpDeployStr = '';
             $tmpDeployArr = [];
             if (is_array($form->input('config_on_deploy'))) {
-                foreach ($form->input('config_on_deploy') as $key => $value) {
-                    if ($value !== null) {
-                        $tmpDeployStr .= $value .'#';
-                        $tmpDeployArr[] = $value;
+                $cnt = count($form->input('config_on_deploy'));
+                if ($cnt == 1) {
+                    if (null === $form->input('config_on_deploy')[$cnt - 1]) {
+                        $tmpDeployArr = '';
+                    }
+                } else {
+                    foreach ($form->input('config_on_deploy') as $key => $value) {
+                        if ($value !== null) {
+                            $tmpDeployArr[] = $value;
+                        }
                     }
                 }
             }
-            if ($form->input('customize_on_deploy') !== null) {
-                $tmpDeployStr .= $form->input('customize_on_deploy') .'#';
-                $tmpDeployArr[] = 'custom_'.$form->input('customize_on_deploy');
-            }
-            if ($postData['customize_on_deploy'] !== null) {
-                $tmpDeployArr[] = 'custom_'.$postData['customize_on_deploy'];
-            }
             $form->input('config_on_deploy', $tmpDeployArr);
+            if (null === $form->input('custom_on_deploy')) {
+                $form->input('custom_on_deploy', '');
+            } else {
+                $arr = explode("\r\n", $form->input('custom_on_deploy'));
+                $form->input('custom_on_deploy', $arr);
+            }
             // 校验on-deploy入参 - end
 
             // 校验on-release入参 - begin
-            $tmpDeployStr = '';
             $tmpDeployArr = [];
             if (is_array($form->input('config_on_release'))) {
-                foreach ($form->input('config_on_release') as $key => $value) {
-                    if ($value !== null) {
-                        $tmpDeployStr .= $value .'#';
-                        $tmpDeployArr[] = $value;
+                $cnt = count($form->input('config_on_release'));
+                if ($cnt == 1) {
+                    if (null === $form->input('config_on_release')[$cnt - 1]) {
+                        $tmpDeployArr = '';
+                    }
+                } else {
+                    foreach ($form->input('config_on_release') as $key => $value) {
+                        if ($value !== null) {
+                            $tmpDeployArr[] = $value;
+                        }
                     }
                 }
             }
-            if ($form->input('customize_on_release') !== null) {
-                $tmpDeployStr .= $form->input('customize_on_release') .'#';
-                $tmpDeployArr[] = 'custom_'.$form->input('customize_on_release');
-            }
-            if ($postData['customize_on_release'] !== null) {
-                $tmpDeployArr[] = 'custom_'.$postData['customize_on_release'];
-            }
             $form->input('config_on_release', $tmpDeployArr);
+            if (null === $form->input('custom_on_release')) {
+                $form->input('custom_on_release', '');
+            } else {
+                $arr = explode("\r\n", $form->input('custom_on_release'));
+                $form->input('custom_on_release', $arr);
+            }
             // 校验on-release入参 - end
 
             // 校验post-deploy入参 - begin
-            $tmpDeployStr = '';
             $tmpDeployArr = [];
             if (is_array($form->input('config_post_release'))) {
-                foreach ($form->input('config_post_release') as $key => $value) {
-                    if ($value !== null) {
-                        $tmpDeployStr .= $value .'#';
-                        $tmpDeployArr[] = $value;
+                $cnt = count($form->input('config_post_release'));
+                if ($cnt == 1) {
+                    if (null === $form->input('config_post_release')[$cnt - 1]) {
+                        $tmpDeployArr = '';
+                    }
+                } else {
+                    foreach ($form->input('config_post_release') as $key => $value) {
+                        if ($value !== null) {
+                            $tmpDeployArr[] = $value;
+                        }
                     }
                 }
             }
-            if ($form->input('customize_post_release') !== null) {
-                $tmpDeployStr .= $form->input('customize_post_release') .'#';
-                $tmpDeployArr[] = 'custom_'.$form->input('customize_post_release');
-            }
-            if ($postData['customize_post_release'] !== null) {
-                $tmpDeployArr[] = 'custom_'.$postData['customize_post_release'];
-            }
             $form->input('config_post_release', $tmpDeployArr);
+            if (null === $form->input('custom_post_release')) {
+                $form->input('custom_post_release', '');
+            } else {
+                $arr = explode("\r\n", $form->input('custom_post_release'));
+                $form->input('custom_post_release', $arr);
+            }
             // 校验post-release入参 - end
 
             // 校验post-release入参 - begin
-            $tmpDeployStr = '';
             $tmpDeployArr = [];
             if (is_array($form->input('config_post_deploy'))) {
-                foreach ($form->input('config_post_deploy') as $key => $value) {
-                    if ($value !== null) {
-                        $tmpDeployStr .= $value .'#';
-                        $tmpDeployArr[] = $value;
+                $cnt = count($form->input('config_post_deploy'));
+                if ($cnt == 1) {
+                    if (null === $form->input('config_post_deploy')[$cnt - 1]) {
+                        $tmpDeployArr = '';
+                    }
+                } else {
+                    foreach ($form->input('config_post_deploy') as $key => $value) {
+                        if ($value !== null) {
+                            $tmpDeployArr[] = $value;
+                        }
                     }
                 }
             }
-            if ($form->input('customize_post_deploy') !== null) {
-                $tmpDeployStr .= $form->input('customize_post_deploy') .'#';
-                $tmpDeployArr[] = 'custom_'.$form->input('customize_post_deploy');
-            }
-            if ($postData['customize_post_deploy'] !== null) {
-                $tmpDeployArr[] = 'custom_'.$postData['customize_post_deploy'];
-            }
-            //$form->input('config_post_deploy', rtrim($tmpDeployStr, '#'));
             $form->input('config_post_deploy', $tmpDeployArr);
+            if (null === $form->input('custom_post_deploy')) {
+                $form->input('custom_post_deploy', '');
+            } else {
+                $arr = explode("\r\n", $form->input('custom_post_deploy'));
+                $form->input('custom_post_deploy', $arr);
+            }
             // 校验post-deploy入参 - end
-
         });
-
-        // 限制保存字段
-        $form->ignore(['customize_pre_deploy', 'customize_on_deploy', 'customize_on_release', 'customize_post_release', 'customize_post_deploy']);
 
 
         // 成功写表后的操作, 生产magephp部署的配置文件
         $form->saved(function (Form $form) {
-            $id = $form->model()->id; // 获取对应模型的id
-//            echo "<pre>";
-//            var_dump($form, $id);
-//            die;
             $retry_time = 3;
             while ($retry_time) {
                 //var_dump(request()->all(), $form->input(null));

@@ -210,12 +210,14 @@ class DeploymentTaskController extends Controller
         $form->select('task_env', '部署环境')->load('task_branch', '/admin/branch');
         $form->select('task_branch', '选取分支');
         $form->hidden('task_status')->default(1);
-        $form->tools(function (Form\Tools $tools) {
 
-            // 去掉返回按钮
-            $tools->disableBackButton();
+        $form->footer(function ($footer) {
+            // 去掉`重置`按钮
+//            $footer->disableReset();
+            // 去掉`提交`按钮
+//            $footer->disableSubmit();
         });
-        $form->disableReset();
+
         $form->saving(function (Form $form) {
             $error = [];
             if (empty($form->input('config_id'))) {

@@ -88,13 +88,36 @@ class UtilsService
             Log::info('the config params is wrong.check it.');
             return false;
         }
-        Log::info('the ret '.print_r($configItem));
-        extract($configItem);
-
+        Log::info('the ret '.print_r($configItem, true));
+        $customFieldArr = config('deployment.custom_field');
+        $initMapFields = config('deployment.init_map_field');
         $deployConfigArr = config('deployment');
         $tmplFields = $deployConfigArr['yml_map_fields'];
         $tmpl = $deployConfigArr['yml_template'];
         $deployConfig = $deployConfigArr['deploy_config'];
+
+        foreach ($customFieldArr as $k => $v) {
+            if (isset($initMapFields[$v])) { // 可选值存在，map真实值
+                foreach ($configItem[$v] as $f1 => $v1) {
+                    if (isset($deployConfig[$initMapFields[$v]][$v1])) {
+                        $configItem[$v][$f1] = $deployConfig[$initMapFields[$v]][$v1];
+                    }
+                }
+            }
+
+            if (isset($configItem[$k]) && !empty($configItem[$k])) {
+                foreach ($configItem[$k] as $key => $value) {
+                    $arr = explode('|', $value);
+                    foreach ($arr as $vv) {
+                        $configItem[$v][] = $vv;
+                    }
+                }
+            }
+            unset($configItem[$k]);
+        }
+
+        extract($configItem);
+
         $config_env = $deployConfig['task_env'][$config_env];
         $common_items = $deployConfigArr['common_mage_yml'];
         $log_dir = $deployConfig['log_dir'];
@@ -127,31 +150,10 @@ class UtilsService
                     } else if ($tmpArr[1] == 'int') {
                         $mageYmlFile['magephp']['environments'][$config_env][$key] = (int)${$tmpArr[0]};
                     } else if ($tmpArr[1] == 'array') {
-                        if (is_string(${$tmpArr[0]})) {
-                            if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
-                                $mageYmlFile['magephp']['environments'][$config_env][$key] = '';
-                            } else {
-                                $mageYmlFile['magephp']['environments'][$config_env][$key] = explode($split, trim(${$tmpArr[0]}, "'"));
-                            }
+                        if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
+                            $mageYmlFile['magephp']['environments'][$config_env][$key] = '';
                         } else if (is_array(${$tmpArr[0]})) {
-                            $customArr = $builInArr= [];
-                            foreach (${$tmpArr[0]} as $k => $v) {
-                                if (strpos($v, $customStr) !== false) {
-                                    $string = substr($v, strlen($customStr));
-                                    $tmpV = explode($split, $string);
-                                    $cnt = count($tmpV);
-                                    for ($i = 0; $i < $cnt; $i++) {
-                                        $customArr[] = $tmpV[$i];
-                                    }
-                                } else {
-                                    Log::info($deployConfig[$key]);
-                                    if (isset($deployConfig[$key])) {
-                                        Log::info($deployConfig[$key]);
-                                        $builInArr[] = $deployConfig[$key][$v];
-                                    }
-                                }
-                            }
-                            $mageYmlFile['magephp']['environments'][$config_env][$key] = array_merge($builInArr, $customArr);
+                            $mageYmlFile['magephp']['environments'][$config_env][$key] = ${$tmpArr[0]};
                         }
                     }
                 }
@@ -181,31 +183,11 @@ class UtilsService
                                     } else if ($tmpArr[1] == 'int') {
                                         $info[$rootMage][$item][$config_env][$key] = (int)${$tmpArr[0]};
                                     } else if ($tmpArr[1] == 'array') {
-                                        if (is_string(${$tmpArr[0]})) {
-                                            if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
-                                                $info[$rootMage][$item][$config_env][$key] = '';
-                                            } else {
-                                                $info[$rootMage][$item][$config_env][$key] = explode($split, trim(${$tmpArr[0]}, "'"));
-                                            }
+                                        if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
+                                            $info[$rootMage][$item][$config_env][$key] = '';
                                         } else if (is_array(${$tmpArr[0]})) {
-                                            $customArr = $builInArr= [];
-                                            foreach (${$tmpArr[0]} as $k => $v) {
-                                                if (strpos($v, $customStr) !== false) {
-                                                    $string = substr($v, strlen($customStr));
-                                                    $tmpV = explode($split, $string);
-                                                    $cnt = count($tmpV);
-                                                    for ($i = 0; $i < $cnt; $i++) {
-                                                        $customArr[] = $tmpV[$i];
-                                                    }
-                                                } else {
-                                                    Log::info($deployConfig[$key]);
-                                                    if (isset($deployConfig[$key])) {
-                                                        Log::info($deployConfig[$key]);
-                                                        $builInArr[] = $deployConfig[$key][$v];
-                                                    }
-                                                }
-                                            }
-                                            $info[$rootMage][$item][$config_env][$key] = array_merge($builInArr, $customArr);
+//                                            $info[$rootMage][$item][$config_env][$key] = array_merge($builInArr, $customArr);
+                                            $info[$rootMage][$item][$config_env][$key] = ${$tmpArr[0]};
                                         }
                                     }
                                 }
