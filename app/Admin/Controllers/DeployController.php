@@ -9,6 +9,7 @@ use Symfony\Component\Process\Process;
 use Log;
 use Mage\MageApplication;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+set_time_limit(0);
 
 class DeployController extends Controller
 {
@@ -148,7 +149,7 @@ class DeployController extends Controller
         chdir($config_path);
         Log::info('now the path== '.getcwd());
         $phpPath = $this->getBinPath();
-        $cmd = [$phpPath, $vendorMageBin, 'deploy', $env_name];
+        $cmd = ['nohup', $phpPath, $vendorMageBin, 'deploy', $env_name];
         $res = $this->doShellCmd($cmd);
 
         $task_status = 3; // 执行失败
@@ -205,7 +206,7 @@ class DeployController extends Controller
         chdir($config_path);
         Log::info('now the path== '.getcwd());
         $phpPath = $this->getBinPath();
-        $cmd = [$phpPath, $vendorMageBin, 'releases:rollback', $env_name, $ids['releaseId']];
+        $cmd = ['nohup', $phpPath, $vendorMageBin, 'releases:rollback', $env_name, $ids['releaseId']];
         $res = $this->doShellCmd($cmd);
 
         $release_status = 2; // 执行失败

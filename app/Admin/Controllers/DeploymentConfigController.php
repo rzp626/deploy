@@ -42,8 +42,8 @@ class DeploymentConfigController extends Controller
     public function show($id, Content $content)
     {
         return $content
-            ->header('Detail')
-            ->description('description')
+            ->header('查看')
+            ->description('配置详情页')
             ->body($this->detail($id));
     }
 
@@ -57,9 +57,9 @@ class DeploymentConfigController extends Controller
     public function edit($id, Content $content)
     {
         return $content
-            ->header('Edit')
-            ->description('description')
-            ->body($this->form()->edit($id));
+            ->header('编辑配置')
+            ->description('重新编辑各个配置项')
+            ->body($this->form($id)->edit($id));
     }
 
     /**
@@ -126,14 +126,103 @@ class DeploymentConfigController extends Controller
     protected function detail($id)
     {
         $show = new Show(DeploymentConfig::findOrFail($id));
+        $configArr = config('deployment.deploy_config');
+        $envArr = $configArr['task_env'];
+        $branchArr = $configArr['task_branch'];
+        $preDeployArr = $configArr['pre-deploy'];
+        $onDeployArr = $configArr['on-deploy'];
+        $onReleaseArr = $configArr['on-release'];
+        $postReleaseArr = $configArr['post-release'];
+        $postDeployArr = $configArr['post-deploy'];
+
         $show->config_name('项目名');
-        $show->config_env('部署环境');
+        $show->config_env('部署环境')->as(function ($config_env) use ($envArr) {
+            return $envArr[$config_env].'环境';
+        });
         $show->config_user('权限用户');
-        $show->config_branch('选取分支');
+        $show->config_branch('选取分支')->as(function ($config_branch) use ($branchArr) {
+            return $branchArr[$config_branch].'分支';
+        });
         $show->config_from('源路径');
+        $show->config_releases('备份数量');
         $show->config_host_path('目标主机路径');
         $show->config_exlude('非部署目录');
         $show->config_hosts('部署主机');
+        $show->divider();
+        $show->config_pre_deploy('pre-deploy任务')->as(function ($config_pre_deploy) use($preDeployArr) {
+            if (empty($config_pre_deploy)) {
+                return '';
+            }
+
+            $arr = explode('|', $config_pre_deploy);
+            $str = '';
+            foreach ($arr as $k => $v) {
+                $str .= $preDeployArr[$v] . '|';
+            }
+
+            return rtrim($str, '|');
+        });
+        $show->custom_pre_deploy('pre-deploy自定义任务');
+        $show->config_on_deploy('on-deploy命令')->as(function ($config_on_deploy) use($onDeployArr) {
+            if (empty($config_on_deploy)) {
+                return '';
+            }
+
+            $arr = explode('|', $config_on_deploy);
+            $str = '';
+            foreach ($arr as $k => $v) {
+                $str .= $onDeployArr[$v] . '|';
+            }
+
+            return rtrim($str, '|');
+        });
+        $show->custom_on_deploy('on-deploy自定义命令');
+
+        $show->config_on_release('on-release命令')->as(function ($config_on_release) use($onReleaseArr) {
+            if (empty($config_on_release)) {
+                return '';
+            }
+
+            $arr = explode('|', $config_on_release);
+            $str = '';
+            foreach ($arr as $k => $v) {
+                $str .= $onReleaseArr[$v] . '|';
+            }
+
+            return rtrim($str, '|');
+        });
+        $show->custom_on_release('on-deploy自定义命令');
+
+        $show->config_post_release('post-release命令')->as(function ($config_post_release) use($postReleaseArr) {
+            if (empty($config_post_release)) {
+                return '';
+            }
+
+            $arr = explode('|', $config_post_release);
+            $str = '';
+            foreach ($arr as $k => $v) {
+                $str .= $postReleaseArr[$v] . '|';
+            }
+
+            return rtrim($str, '|');
+        });
+        $show->custom_post_release('on-deploy自定义命令');
+
+        $show->config_post_deploy('post-deploy命令')->as(function ($config_post_deploy) use($postDeployArr) {
+            if (empty($config_post_deploy)) {
+                return '';
+            }
+
+            $arr = explode('|', $config_post_deploy);
+            $str = '';
+            foreach ($arr as $k => $v) {
+                $str .= $postDeployArr[$v] . '|';
+            }
+
+            return rtrim($str, '|');
+        });
+        $show->custom_post_deploy('on-deploy自定义命令');
+
         return $show;
     }
 
@@ -197,12 +286,23 @@ class DeploymentConfigController extends Controller
 
             // 排除目录/文件
             if ($form->input('config_exlude') && !empty($form->input('config_exlude'))) {
+                if (null !== strpos($form->input('config_exlude'), '|')) { // 未解决的原因
+                    $str = $form->input('config_exlude');
+                    $str = str_replace('|', "\r\n", $str);
+                    $form->input('config_exlude', $str);
+                }
+
                 $arr = explode("\r\n", $form->input('config_exlude'));
                 $form->input('config_exlude', $arr);
             }
 
             // 处理主机
             if ($form->input('config_hosts') && !empty($form->input('config_hosts'))) {
+                if (null !== strpos($form->input('config_hosts'), '|')) { // 未解决的原因
+                    $str = $form->input('config_hosts');
+                    $str = str_replace('|', "\r\n", $str);
+                    $form->input('config_hosts', $str);
+                }
                 $arr = explode("\r\n", $form->input('config_hosts'));
                 $form->input('config_hosts', $arr);
             }
@@ -226,8 +326,13 @@ class DeploymentConfigController extends Controller
 
             $form->input('config_pre_deploy', $tmpDeployArr);
             if (null === $form->input('custom_pre_deploy')) {
-                $form->input('custom_pre_deploy', '');
+                $form->input('custom_pre_deploy', []);
             } else {
+                if (null !== strpos($form->input('custom_pre_deploy'), '|')) { // 未解决的原因
+                    $str = $form->input('custom_pre_deploy');
+                    $str = str_replace('|', "\r\n", $str);
+                    $form->input('custom_pre_deploy', $str);
+                }
                 $arr = explode("\r\n", $form->input('custom_pre_deploy'));
                 $form->input('custom_pre_deploy', $arr);
             }
@@ -253,6 +358,11 @@ class DeploymentConfigController extends Controller
             if (null === $form->input('custom_on_deploy')) {
                 $form->input('custom_on_deploy', '');
             } else {
+                if (null !== strpos($form->input('custom_on_deploy'), '|')) { // 未解决的原因
+                    $str = $form->input('custom_on_deploy');
+                    $str = str_replace('|', "\r\n", $str);
+                    $form->input('custom_on_deploy', $str);
+                }
                 $arr = explode("\r\n", $form->input('custom_on_deploy'));
                 $form->input('custom_on_deploy', $arr);
             }
@@ -276,8 +386,13 @@ class DeploymentConfigController extends Controller
             }
             $form->input('config_on_release', $tmpDeployArr);
             if (null === $form->input('custom_on_release')) {
-                $form->input('custom_on_release', '');
+                $form->input('custom_on_release', []);
             } else {
+                if (null !== strpos($form->input('custom_on_release'), '|')) { // 未解决的原因
+                    $str = $form->input('custom_on_release');
+                    $str = str_replace('|', "\r\n", $str);
+                    $form->input('custom_on_release', $str);
+                }
                 $arr = explode("\r\n", $form->input('custom_on_release'));
                 $form->input('custom_on_release', $arr);
             }
@@ -301,8 +416,13 @@ class DeploymentConfigController extends Controller
             }
             $form->input('config_post_release', $tmpDeployArr);
             if (null === $form->input('custom_post_release')) {
-                $form->input('custom_post_release', '');
+                $form->input('custom_post_release', []);
             } else {
+                if (null !== strpos($form->input('custom_post_release'), '|')) { // 未解决的原因
+                    $str = $form->input('custom_post_release');
+                    $str = str_replace('|', "\r\n", $str);
+                    $form->input('custom_post_release', $str);
+                }
                 $arr = explode("\r\n", $form->input('custom_post_release'));
                 $form->input('custom_post_release', $arr);
             }
@@ -326,8 +446,13 @@ class DeploymentConfigController extends Controller
             }
             $form->input('config_post_deploy', $tmpDeployArr);
             if (null === $form->input('custom_post_deploy')) {
-                $form->input('custom_post_deploy', '');
+                $form->input('custom_post_deploy', []);
             } else {
+                if (null !== strpos($form->input('custom_post_deploy'), '|')) { // 未解决的原因
+                    $str = $form->input('custom_post_deploy');
+                    $str = str_replace('|', "\r\n", $str);
+                    $form->input('custom_post_deploy', $str);
+                }
                 $arr = explode("\r\n", $form->input('custom_post_deploy'));
                 $form->input('custom_post_deploy', $arr);
             }
