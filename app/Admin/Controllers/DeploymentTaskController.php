@@ -128,6 +128,7 @@ class DeploymentTaskController extends Controller
             $rollbackId = $id.'-'.$releaseId;
             $releaseStatus = $actions->row->release_status;
             $aLink = '';
+            $info = '<a href="/admin/log/'.$releaseId.'" class="btn btn-xs btn-info">执行日志</a>&nbsp;&nbsp;&nbsp;&nbsp;';
             if ($releaseStatus == 1) { // 回滚成功 == 已回滚
                 $aLink = '<span class="btn btn-xs btn-warning">回滚成功</span>';
             } else if ($releaseStatus == 2) { // 回滚失败
@@ -141,6 +142,7 @@ class DeploymentTaskController extends Controller
                 }
             }
 
+
             if ($status == 1) {
                 $actions->disableView();
                 $actions->disableDelete();
@@ -151,13 +153,13 @@ class DeploymentTaskController extends Controller
                 $actions->disableDelete();
                 $actions->disableEdit();
                 $actions->disableView();
-                $actions->append($aLink);
+                $actions->append($info.$aLink);
             } else if ($status == 3) {
                 $actions->disableView();
                 $actions->disableDelete();
                 $actions->disableEdit();
                 $url = "<span class='btn btn-xs btn-danger'>发布失败</span>";
-                $actions->append($url);
+                $actions->append($info.$url);
             }
         });
 

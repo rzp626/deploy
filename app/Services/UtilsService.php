@@ -14,6 +14,12 @@ use Symfony\Component\Yaml\Yaml;
  */
 class UtilsService
 {
+    /**
+     * 获取分支- 废弃
+     *
+     * @param $taskInfo
+     * @return bool|mixed
+     */
     public static function changeConfigFunc($taskInfo)
     {
         if (!is_array($taskInfo) || !array_key_exists('task_branch', $taskInfo) || !array_key_exists('task_env', $taskInfo) || !array_key_exists('task_id', $taskInfo)) {
@@ -204,4 +210,112 @@ class UtilsService
             return true;
         }
     }
+
+    /**
+     * 获取目录下文件函数
+     *
+     * @param $dir
+     * @return array
+     */
+    public static function getFile($dir)
+    {
+        $dp = opendir($dir);
+        $fileArr = array();
+        while (!false == $curFile = readdir($dp)) {
+            if ($curFile!="." && $curFile!=".." && $curFile!="") {
+                if (is_dir($curFile)) {
+                    $fileArr = self::getFile($dir."/".$curFile);
+                } else {
+                    $fileArr[] = $dir."/".$curFile;
+                }
+            }
+        }
+        return $fileArr;
+
+    }
+
+    /**
+     * 获取文件内容
+     *
+     * @param $file
+     * @return string
+     */
+    public static function getFileContent($file)
+    {
+        $fileContent = '';
+        if (!$fp = fopen($file, "r")) {
+            die("Cannot open file $file");
+        }
+        while ($text = fread($fp, 4096)) {
+            $fileContent .= $text;
+        }
+        return $fileContent;
+    }
+
+    /**
+     * 获取文件大小(KB)
+     *
+     * @param $file
+     * @return string
+     */
+    public static function getFileSize($file)
+    {
+        $filesize = intval(filesize($file)/1024)."K";
+        return $filesize;
+    }
+
+    /**
+     *获取文件最后修改的时间
+     *
+     * @param $file
+     * @return false|string
+     */
+    public static function getFileTime($file)
+    {
+        $filetime = date("Y-m-d", filemtime($file));
+        return $filetime;
+    }
+
+    /**
+     * 搜索指定文件
+     *
+     * @param $file
+     * @param $keyword
+     * @return bool
+     */
+    public static function searchText($file, $keyword)
+    {
+        $text = self::getFileContent($file);
+        if (preg_match("/$keyword/i", $text)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 搜索目录下所有文件
+     *
+     * @param $dir
+     * @param $keyword
+     * @return array|bool
+     */
+    public static function searchFile($dir, $keyword)
+    {
+        $sFile = self::getFile($dir);
+        if (count($sFile) <= 0) {
+            return false;
+        }
+        $sResult = array();
+        foreach ($sFile as $file) {
+            if (self::searchText($file, $keyword)) {
+                $sResult[] = $file;
+            }
+        }
+        if (count($sResult) <= 0) {
+            return false;
+        } else {
+            return $sResult;
+        }
+    }
+
 }

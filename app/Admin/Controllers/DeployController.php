@@ -4,12 +4,14 @@ namespace App\Admin\Controllers;
 use App\DeploymentConfig;
 use App\DeploymentTask;
 use App\Http\Controllers\Controller;
+use App\Services\UtilsService;
 use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
 use Log;
 use Mage\MageApplication;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 set_time_limit(0);
+//sleep(15);
 
 class DeployController extends Controller
 {
@@ -333,5 +335,36 @@ class DeployController extends Controller
         }
 
         return $selection;
+    }
+
+    public function showLog($releaseId)
+    {
+        if (!isset($releaseId) || empty($releaseId)) {
+            header('Cache-control: private, must-revalidate');
+            echo "<script>alert('查看执行日志操作失败,请检查.');location.href='".$_SERVER["HTTP_REFERER"]."';</script>";
+            exit;
+        }
+        // 根据发布id，获取log文件
+        $logDir = '/data0/deploy/logs';
+        if (!is_dir($logDir)) {
+            header('Cache-control: private, must-revalidate');
+            echo "<script>alert('执行日志不存在,请检查.');location.href='".$_SERVER["HTTP_REFERER"]."';</script>";
+            exit;
+        }
+
+        $fileArr = UtilsService::searchFile($logDir, $releaseId);
+        $searchSum = count($fileArr);
+        Log::info("搜索关键字: -- $releaseId -- 搜索目录: $logDir, 搜索结果: $searchSum");
+        if ($searchSum <= 0) {
+            echo "没有搜索到任何结果";
+        } else {
+            rsort($fileArr);
+            $str = '';
+            foreach ($fileArr as $key => $file) {
+                $str .= UtilsService::getFileContent($file);
+                $str .= PHP_EOL.'=========================================================='.PHP_EOL.'不同阶段分割线'.PHP_EOL.'=========================================================='.PHP_EOL.PHP_EOL;
+            }
+            return view('deploy.index')->with('data', $str);
+        }
     }
 }

@@ -16,6 +16,7 @@ Route::group([
 
     $router->get('deploy/{id}', 'DeployController@deploy');
     $router->get('rollback/{releaseId}', 'DeployController@rollback');
+    $router->get('log/{releaseId}', 'DeployController@showLog');
     $router->get('env', 'DeployController@selectEnv');
     $router->get('branch', 'DeployController@selectBranch');
     $router->get('config', 'DeployController@selectConfigName');

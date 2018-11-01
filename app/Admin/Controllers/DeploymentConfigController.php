@@ -291,8 +291,8 @@ class DeploymentConfigController extends Controller
                     $str = str_replace('|', "\r\n", $str);
                     $form->input('config_exlude', $str);
                 }
-
                 $arr = explode("\r\n", $form->input('config_exlude'));
+                $arr = array_filter($arr);
                 $form->input('config_exlude', $arr);
             }
 
@@ -304,6 +304,7 @@ class DeploymentConfigController extends Controller
                     $form->input('config_hosts', $str);
                 }
                 $arr = explode("\r\n", $form->input('config_hosts'));
+                $arr = array_filter($arr);
                 $form->input('config_hosts', $arr);
             }
 
@@ -313,7 +314,7 @@ class DeploymentConfigController extends Controller
                 $cnt = count($form->input('config_pre_deploy'));
                 if ($cnt == 1) {
                     if (null === $form->input('config_pre_deploy')[$cnt - 1]) {
-                        $tmpDeployArr = '';
+                        $tmpDeployArr = [];
                     }
                 } else {
                     foreach ($form->input('config_pre_deploy') as $key => $value) {
@@ -334,6 +335,7 @@ class DeploymentConfigController extends Controller
                     $form->input('custom_pre_deploy', $str);
                 }
                 $arr = explode("\r\n", $form->input('custom_pre_deploy'));
+                $arr = array_filter($arr);
                 $form->input('custom_pre_deploy', $arr);
             }
             // 校验pre-deploy入参 - end
@@ -344,7 +346,7 @@ class DeploymentConfigController extends Controller
                 $cnt = count($form->input('config_on_deploy'));
                 if ($cnt == 1) {
                     if (null === $form->input('config_on_deploy')[$cnt - 1]) {
-                        $tmpDeployArr = '';
+                        $tmpDeployArr = [];
                     }
                 } else {
                     foreach ($form->input('config_on_deploy') as $key => $value) {
@@ -364,6 +366,7 @@ class DeploymentConfigController extends Controller
                     $form->input('custom_on_deploy', $str);
                 }
                 $arr = explode("\r\n", $form->input('custom_on_deploy'));
+                $arr = array_filter($arr);
                 $form->input('custom_on_deploy', $arr);
             }
             // 校验on-deploy入参 - end
@@ -374,7 +377,7 @@ class DeploymentConfigController extends Controller
                 $cnt = count($form->input('config_on_release'));
                 if ($cnt == 1) {
                     if (null === $form->input('config_on_release')[$cnt - 1]) {
-                        $tmpDeployArr = '';
+                        $tmpDeployArr = [];
                     }
                 } else {
                     foreach ($form->input('config_on_release') as $key => $value) {
@@ -394,6 +397,7 @@ class DeploymentConfigController extends Controller
                     $form->input('custom_on_release', $str);
                 }
                 $arr = explode("\r\n", $form->input('custom_on_release'));
+                $arr = array_filter($arr);
                 $form->input('custom_on_release', $arr);
             }
             // 校验on-release入参 - end
@@ -404,7 +408,7 @@ class DeploymentConfigController extends Controller
                 $cnt = count($form->input('config_post_release'));
                 if ($cnt == 1) {
                     if (null === $form->input('config_post_release')[$cnt - 1]) {
-                        $tmpDeployArr = '';
+                        $tmpDeployArr = [];
                     }
                 } else {
                     foreach ($form->input('config_post_release') as $key => $value) {
@@ -424,6 +428,7 @@ class DeploymentConfigController extends Controller
                     $form->input('custom_post_release', $str);
                 }
                 $arr = explode("\r\n", $form->input('custom_post_release'));
+                $arr = array_filter($arr);
                 $form->input('custom_post_release', $arr);
             }
             // 校验post-release入参 - end
@@ -434,7 +439,7 @@ class DeploymentConfigController extends Controller
                 $cnt = count($form->input('config_post_deploy'));
                 if ($cnt == 1) {
                     if (null === $form->input('config_post_deploy')[$cnt - 1]) {
-                        $tmpDeployArr = '';
+                        $tmpDeployArr = [];
                     }
                 } else {
                     foreach ($form->input('config_post_deploy') as $key => $value) {
@@ -454,6 +459,7 @@ class DeploymentConfigController extends Controller
                     $form->input('custom_post_deploy', $str);
                 }
                 $arr = explode("\r\n", $form->input('custom_post_deploy'));
+                $arr = array_filter($arr);
                 $form->input('custom_post_deploy', $arr);
             }
             // 校验post-deploy入参 - end
