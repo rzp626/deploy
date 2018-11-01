@@ -5,17 +5,30 @@ namespace App\Admin\Controllers;
 use App\DeploymentConfig;
 use App\Http\Controllers\Controller;
 use App\Services\UtilsService;
+use Encore\Admin\Admin;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
 use function foo\func;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
+use Encore\Admin\Auth\Permission;
 
 class DeploymentConfigController extends Controller
 {
     use HasResourceActions;
+
+    private $user;
+
+    /**
+     * DeploymentConfigController constructor.
+     */
+    public function __construct()
+    {
+        $this->user = new Admin();
+    }
 
     /**
      * Index interface.
@@ -27,8 +40,8 @@ class DeploymentConfigController extends Controller
     {
         $arr = config('deployment.deploy_config');
         return $content
-            ->header('Index')
-            ->description('description')
+            ->header('列表')
+            ->description('列表详情')
             ->body($this->grid($arr));
     }
 
@@ -70,6 +83,7 @@ class DeploymentConfigController extends Controller
      */
     public function create(Content $content)
     {
+//        Permission::check('deploy-config');
         return $content
             ->header('新增部署配置')
             ->description('新增部署配置项目')
@@ -84,6 +98,7 @@ class DeploymentConfigController extends Controller
     protected function grid($arr)
     {
         $grid = new Grid(new DeploymentConfig);
+        $user = new Admin();
         $grid->model()->orderBy('id', 'desc');
         $grid->id('ID')->sortabled();
         $grid->config_name('项目名');
@@ -105,15 +120,23 @@ class DeploymentConfigController extends Controller
         });
 
         $grid->updated_at('创建时间');
-
+        $grid->operator('操作人');
         $grid->tools(function ($tools) {
             $tools->batch(function ($batch) {
                 $batch->disableDelete();
             });
         });
-        $grid->actions(function (Grid\Displayers\Actions $actions) {
-            $actions->disableDelete();
+
+        $grid->actions(function (Grid\Displayers\Actions $actions) use($user) {
+            if (!$user->user()->can('delete-image')) {
+                $actions->disableDelete();
+            }
+            if (($actions->row->operator) != ($user->user()->username)) {
+                $actions->disableEdit();
+            }
+
         });
+
         return $grid;
     }
 
@@ -222,7 +245,6 @@ class DeploymentConfigController extends Controller
             return rtrim($str, '|');
         });
         $show->custom_post_deploy('on-deploy自定义命令');
-
         return $show;
     }
 
@@ -269,6 +291,13 @@ class DeploymentConfigController extends Controller
             $form->checkbox('config_post_deploy', '[可选]')->options($branchArr['post-deploy'])->placeholder('输入部署后执行的任务(多个任务用|分割)')->stacked();
             $form->textarea('custom_post_deploy', '[自定义]')->rows(5)->placeholder('输入自定义执行的任务(一行一命令)');
         });
+
+        $form->hidden('operator')->default('');
+        $username = $this->user->user()->username;
+        if ($username) {
+            Log::info('the operator is wrong: '. $username .'The time is '.time());
+            $form->input('operator', $username);
+        }
 
         // 表单写入前判断
         $form->saving(function (Form $form){
@@ -358,7 +387,7 @@ class DeploymentConfigController extends Controller
             }
             $form->input('config_on_deploy', $tmpDeployArr);
             if (null === $form->input('custom_on_deploy')) {
-                $form->input('custom_on_deploy', '');
+                $form->input('custom_on_deploy', []);
             } else {
                 if (null !== strpos($form->input('custom_on_deploy'), '|')) { // 未解决的原因
                     $str = $form->input('custom_on_deploy');
@@ -463,6 +492,7 @@ class DeploymentConfigController extends Controller
                 $form->input('custom_post_deploy', $arr);
             }
             // 校验post-deploy入参 - end
+
         });
 
 

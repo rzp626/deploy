@@ -102,6 +102,7 @@ class UtilsService
         $tmpl = $deployConfigArr['yml_template'];
         $deployConfig = $deployConfigArr['deploy_config'];
 
+        unset($configItem['operator']);
         foreach ($customFieldArr as $k => $v) {
             if (isset($initMapFields[$v])) { // 可选值存在，map真实值
                 foreach ($configItem[$v] as $f1 => $v1) {

@@ -34,6 +34,10 @@ class DeploymentConfig extends Model
     protected $hidden = ['customize_pre_deploy', 'customize_on_deploy', 'customize_on_release', 'customize_post_release', 'customize_post_deploy'];
 
 
+    public function setOperatorAttribute($value) {
+        $this->attributes['operator'] = $value;
+    }
+
     public function setConfigPreDeployAttribute($value){
         $this->attributes['config_pre_deploy'] =trim(implode("|",$value),',');
     }
