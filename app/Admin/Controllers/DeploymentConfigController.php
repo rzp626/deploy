@@ -10,7 +10,6 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
-use function foo\func;
 use Illuminate\Support\MessageBag;
 
 class DeploymentConfigController extends Controller
@@ -27,7 +26,7 @@ class DeploymentConfigController extends Controller
     {
         $arr = config('deployment.deploy_config');
         return $content
-            ->header('Index')
+            ->header('首页')
             ->description('description')
             ->body($this->grid($arr));
     }

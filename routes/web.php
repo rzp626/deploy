@@ -11,10 +11,13 @@
 |
 */
 
-Route::get('/', function () {
-    return redirect('admin');
-    return view('welcome');
-});
+//Route::get('/', function () {
+//    return redirect('admin');
+//    return view('welcome');
+//});
+//Route::get('deploy/{id}','DeployController@test');
 
-Route::get('deploy/{id}','DeployController@test');
-Route::get('test', 'TestController@test');
+// test-router
+Route::get('/', 'CasController@login');
+Route::get('logout', 'CasController@logout');
+Route::get('test', 'CasController@test');

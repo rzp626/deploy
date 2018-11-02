@@ -114,5 +114,15 @@ return [
         'config_post_deploy' => 'post-deploy',
         'config_hosts' => 'config_hosts',
     ],
+
+    'admin' => [
+        'organization' => '增长技术',
+        'organizationt3' => '新浪集团_微博_微博产品部',
+        'companyCode' => 'SINA',
+        'telephone' => '',
+        'companyCodes' => '',
+        'uid' => '',
+        'erpname' => '',
+    ],
 ];
 

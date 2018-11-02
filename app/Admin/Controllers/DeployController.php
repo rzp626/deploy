@@ -165,6 +165,7 @@ class DeployController extends Controller
 
         // 执行完成后，页面显示
         $data = $this->readOutput();
+        $data = UtilsService::getFileContent($this->sendOutputTo);
         return view('deploy.index')->with('data', $data);
     }
 
