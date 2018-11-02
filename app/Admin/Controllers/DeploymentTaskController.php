@@ -9,14 +9,25 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
-use function foo\func;
 use Illuminate\Support\MessageBag;
 use App\Services\UtilsService;
 use App\DeploymentConfig;
+use Encore\Admin\Admin;
+use Illuminate\Support\Facades\Log;
 
 class DeploymentTaskController extends Controller
 {
     use HasResourceActions;
+
+    private $user;
+
+    /**
+     * DeploymentConfigController constructor.
+     */
+    public function __construct()
+    {
+        $this->user = new Admin();
+    }
 
     protected $orderDefault = [
 //        'created_id' => 'desc',
@@ -89,6 +100,7 @@ class DeploymentTaskController extends Controller
     protected function grid()
     {
         $grid = new Grid(new DeploymentTask);
+        $user = new Admin();
         $grid->model()->orderBy('id', 'desc');
         $grid->id('Id')->sortable();
         $grid->config_id('项目名称')->display(function ($config_id) {
@@ -163,10 +175,23 @@ class DeploymentTaskController extends Controller
             }
         });
 
+        $grid->operator('操作人');
+
+
         $grid->tools(function ($tools) {
             $tools->batch(function ($batch) {
                 $batch->disableDelete();
             });
+        });
+
+        $grid->actions(function (Grid\Displayers\Actions $actions) use($user) {
+            if (!$user->user()->can('delete-image')) {
+                $actions->disableDelete();
+            }
+            if (($actions->row->operator) != ($user->user()->username)) {
+                $actions->disableEdit();
+            }
+
         });
 
         $grid->filter(function ($filter) {
@@ -219,6 +244,13 @@ class DeploymentTaskController extends Controller
             // 去掉`提交`按钮
 //            $footer->disableSubmit();
         });
+
+        $form->hidden('operator')->default('');
+        $username = $this->user->user()->username;
+        if ($username) {
+            Log::info('the operator is wrong: '. $username .'The time is '.time());
+            $form->input('operator', $username);
+        }
 
         $form->saving(function (Form $form) {
             $error = [];
