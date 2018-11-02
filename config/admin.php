@@ -55,6 +55,7 @@ return [
         'middleware' => ['web', 'admin'],
     ],
 
+
     /*
     |--------------------------------------------------------------------------
     | Laravel-admin install directory
@@ -241,7 +242,7 @@ return [
     | This version number set will appear in the page footer.
     |
     */
-    'version' => '1.5.x-dev',
+    'version' => 'v0.1-beta',
 
     /*
     |--------------------------------------------------------------------------
