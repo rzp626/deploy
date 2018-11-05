@@ -160,7 +160,11 @@ class UtilsService
                         if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
                             $mageYmlFile['magephp']['environments'][$config_env][$key] = '';
                         } else if (is_array(${$tmpArr[0]})) {
-                            $mageYmlFile['magephp']['environments'][$config_env][$key] = ${$tmpArr[0]};
+                            if (empty(${$tmpArr[0]})) {
+                                $mageYmlFile['magephp']['environments'][$config_env][$key] = '';
+                            } else {
+                                $mageYmlFile['magephp']['environments'][$config_env][$key] = ${$tmpArr[0]};
+                            }
                         }
                     }
                 }
@@ -194,7 +198,11 @@ class UtilsService
                                             $info[$rootMage][$item][$config_env][$key] = '';
                                         } else if (is_array(${$tmpArr[0]})) {
 //                                            $info[$rootMage][$item][$config_env][$key] = array_merge($builInArr, $customArr);
-                                            $info[$rootMage][$item][$config_env][$key] = ${$tmpArr[0]};
+                                            if (empty(${$tmpArr[0]})) {
+                                                $info[$rootMage][$item][$config_env][$key] = '';
+                                            } else {
+                                                $info[$rootMage][$item][$config_env][$key] = ${$tmpArr[0]};
+                                            }
                                         }
                                     }
                                 }

@@ -184,15 +184,15 @@ class DeploymentTaskController extends Controller
             });
         });
 
-        $grid->actions(function (Grid\Displayers\Actions $actions) use($user) {
-            if (!$user->user()->can('delete-image')) {
-                $actions->disableDelete();
-            }
-            if (($actions->row->operator) != ($user->user()->username)) {
-                $actions->disableEdit();
-            }
-
-        });
+//        $grid->actions(function (Grid\Displayers\Actions $actions) use($user) {
+//            if (!$user->user()->can('delete-image')) {
+//                $actions->disableDelete();
+//            }
+//            if (($actions->row->operator) != ($user->user()->username)) {
+//                $actions->disableEdit();
+//            }
+//
+//        });
 
         $grid->filter(function ($filter) {
             $filter->between('created_at', '创建日期')->datetime();
@@ -248,7 +248,7 @@ class DeploymentTaskController extends Controller
         $form->hidden('operator')->default('');
         $username = $this->user->user()->username;
         if ($username) {
-            Log::info('the operator is wrong: '. $username .'The time is '.time());
+            Log::info('the operator is : '. $username .' The time is '.time());
             $form->input('operator', $username);
         }
 

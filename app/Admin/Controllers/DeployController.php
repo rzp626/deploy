@@ -8,8 +8,6 @@ use App\Services\UtilsService;
 use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
 use Log;
-use Mage\MageApplication;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 set_time_limit(0);
 //sleep(15);
 
@@ -256,8 +254,8 @@ class DeployController extends Controller
         $this->sendOutputTo($this->getOutputTo(), $string);
 
         if (!$process->isSuccessful()) { // deploy 失败，操作失败的提示信息
-            $this->consoleLog('error: '.json_encode($process->getErrorOutput()));
-            $this->consoleLog(json_encode($processCmd).'执行失败。');
+            Log::info('error: '.json_encode($process->getErrorOutput()));
+            Log::info(json_encode($processCmd).'执行失败。');
             return false;
         }
 
@@ -265,15 +263,10 @@ class DeployController extends Controller
     }
 
     /**
-     * @param $str
-     * @param array $logInfo
+     * 获取bin路径
+     *
+     * @return string
      */
-    private function consoleLog($str, $logInfo = [])
-    {
-        echo __CLASS__ . ":" . $str . PHP_EOL;
-        Log::info(__CLASS__ . ":" . $str, $logInfo);
-    }
-
     private function getBinPath()
     {
         if (PHP_BINARY) {

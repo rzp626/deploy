@@ -2,6 +2,8 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Extensions\CheckRow;
+use App\Admin\Extensions\Tools\UserGender;
 use App\DeploymentConfig;
 use App\Http\Controllers\Controller;
 use App\Services\UtilsService;
@@ -14,6 +16,7 @@ use Encore\Admin\Show;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 use Encore\Admin\Auth\Permission;
+use Illuminate\Support\Facades\Request;
 
 class DeploymentConfigController extends Controller
 {
@@ -101,6 +104,7 @@ class DeploymentConfigController extends Controller
         $grid->model()->orderBy('id', 'desc');
         $grid->id('ID')->sortabled();
         $grid->config_name('项目名');
+        $opt = '';
         $grid->config_env('配置环境')->display(function ($config_env) {
             $arr = config('deployment.deploy_config.task_env');
             if (isset($arr[$config_env])) {
@@ -124,16 +128,21 @@ class DeploymentConfigController extends Controller
             $tools->batch(function ($batch) {
                 $batch->disableDelete();
             });
+
+//            $tools->append(new UserGender());
         });
 
+//        if (in_array(Request::get('gender'), ['m', 'f'])) {
+//            $grid->model()->where('gender', Request::get('gender'));
+//        }
+
         $grid->actions(function (Grid\Displayers\Actions $actions) use($user) {
-            if (!$user->user()->can('delete-image')) {
-                $actions->disableDelete();
-            }
             if (($actions->row->operator) != ($user->user()->username)) {
                 $actions->disableEdit();
+                $actions->disableDelete();
             }
 
+            $actions->append(new CheckRow($actions->getKey()));
         });
 
         return $grid;
@@ -168,8 +177,24 @@ class DeploymentConfigController extends Controller
         $show->config_from('源路径');
         $show->config_releases('备份数量');
         $show->config_host_path('目标主机路径');
-        $show->config_exlude('非部署目录');
-        $show->config_hosts('部署主机');
+        $show->config_exlude('非部署目录')->as(function ($config_exlude) {
+            $arr = explode('|', $config_exlude);
+            if (count($arr) > 1) {
+                $str = implode("<br>", $arr);
+                return $str;
+            } else {
+                return $config_exlude;
+            }
+        });
+        $show->config_hosts('部署主机')->as(function ($config_hosts) {
+            $arr = explode('|', $config_hosts);
+            if (count($arr) > 1) {
+                $str = implode("<br>", $arr);
+                return $str;
+            } else {
+                return $config_hosts;
+            }
+        });
         $show->divider();
         $show->config_pre_deploy('pre-deploy任务')->as(function ($config_pre_deploy) use($preDeployArr) {
             if (empty($config_pre_deploy)) {
@@ -244,6 +269,13 @@ class DeploymentConfigController extends Controller
             return rtrim($str, '|');
         });
         $show->custom_post_deploy('on-deploy自定义命令');
+
+        $show->panel()
+            ->tools(function ($tools) {
+                $tools->disableEdit();
+//                $tools->disableList();
+                $tools->disableDelete();
+            });
         return $show;
     }
 
@@ -255,7 +287,7 @@ class DeploymentConfigController extends Controller
     protected function form()
     {
         $form = new Form(new DeploymentConfig);
-        $form->disableReset();
+//        $form->disableReset();
         $form->tab('配置基本项', function ($form) {
             $branchArr = config('deployment.deploy_config');
             $form->text('config_name', '项目名')->placeholder('输入配置环境名称')->rules('required|min:3');
@@ -297,6 +329,20 @@ class DeploymentConfigController extends Controller
             Log::info('the operator is wrong: '. $username .'The time is '.time());
             $form->input('operator', $username);
         }
+
+        $form->tools(function (Form\Tools $tools) {
+            // 去掉 '列表' 按钮
+            $tools->disableList();
+
+            // 取缔 '删除' 按钮
+            $tools->disableDelete();
+
+            // 去掉 '查看' 按钮
+            $tools->disableView();
+
+            // 添加一个按钮, 参数可以是字符串, 或者实现了Renderable或Htmlable接口的对象实例
+//            $tools->add('<a class="btn btn-sm btn-danger"><i class="fa fa-trash"></i>&nbsp;&nbsp;delete</a>');
+        });
 
         // 表单写入前判断
         $form->saving(function (Form $form){
