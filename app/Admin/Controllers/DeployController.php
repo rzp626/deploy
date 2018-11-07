@@ -113,8 +113,9 @@ class DeployController extends Controller
      * @param $id
      * @return view
      */
-    public function deploy($id)
+    public function deploy(Request $request)
     {
+        $id = $request->get('id');
         if (!isset($id) || empty($id)) {
             header('Cache-control: private, must-revalidate');
             echo "<script>alert('参数有误');location.href='".$_SERVER["HTTP_REFERER"]."';</script>";
@@ -155,11 +156,26 @@ class DeployController extends Controller
         $task_status = 3; // 执行失败
         if ($res) { // 执行成功
             $task_status = 2;
+            $data = [
+                'code' => '200',
+                'msg' => '发布成功',
+                'page' => $this->sendOutputTo,
+            ];
+        } else {
+            $data = [
+                'code' => '400',
+                'msg' => '发布失败',
+                'page' => $this->sendOutputTo,
+            ];
         }
+
+        // 后面加上sql语句执行的log
         $deployModel = DeploymentTask::find($taskId);
         $deployModel->task_status = $task_status;
         $deployModel->release_id = $this->releaseId;
         $deployModel->save();
+
+        return response()->json($data);
 
         // 执行完成后，页面显示
         $data = $this->readOutput();
@@ -172,8 +188,9 @@ class DeployController extends Controller
      * @param $releaseId
      * @return view
      */
-    public function rollback($releaseId)
+    public function rollback(Request $request)
     {
+        $releaseId = $request->get('id');
         if (empty($releaseId)) {
             header('Cache-control: private, must-revalidate');
             echo "<script>alert('回滚操作失败,请检查.');location.href='".$_SERVER["HTTP_REFERER"]."';</script>";
@@ -213,11 +230,25 @@ class DeployController extends Controller
         $release_status = 2; // 执行失败
         if ($res) { // 执行成功
             $release_status = 1;
+            $data = [
+                'code' => '200',
+                'msg' => '回滚成功',
+                'page' => $this->sendOutputTo,
+            ];
+        } else {
+            $data = [
+                'code' => '400',
+                'msg' => '回滚失败',
+                'page' => $this->sendOutputTo,
+            ];
         }
+
         $deployModel = DeploymentTask::find($taskId);
         $deployModel->release_status = $release_status;
         $deployModel->released_at = date("Y-m-d H:i:s", time());
         $deployModel->save();
+
+        return response()->json($data);
 
         // 执行完成后，页面显示
         $data = $this->readOutput();
@@ -331,15 +362,16 @@ class DeployController extends Controller
         return $selection;
     }
 
-    public function showLog($releaseId)
+    public function showLog(Request $request)
     {
+        $releaseId = $request->get('id');
         if (!isset($releaseId) || empty($releaseId)) {
             header('Cache-control: private, must-revalidate');
             echo "<script>alert('查看执行日志操作失败,请检查.');location.href='".$_SERVER["HTTP_REFERER"]."';</script>";
             exit;
         }
         // 根据发布id，获取log文件
-        $logDir = '/data0/deploy/logs';
+        $logDir = '/data0/deploy/opt';
         if (!is_dir($logDir)) {
             header('Cache-control: private, must-revalidate');
             echo "<script>alert('执行日志不存在,请检查.');location.href='".$_SERVER["HTTP_REFERER"]."';</script>";
@@ -360,5 +392,13 @@ class DeployController extends Controller
             }
             return view('deploy.index')->with('data', $str);
         }
+    }
+
+
+    public function test(Request $request)
+    {
+        sleep(5);
+        $id = $request->get('id');
+        return $id;
     }
 }

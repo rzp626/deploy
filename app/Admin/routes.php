@@ -13,12 +13,13 @@ Route::group([
     $router->get('/', 'HomeController@index');
     $router->resource('deployments', DeploymentTaskController::class);
     $router->resource('deploymentConfig', DeploymentConfigController::class);
-    $router->get('deploy/{id}', 'DeployController@deploy');
-    $router->get('rollback/{releaseId}', 'DeployController@rollback');
-    $router->get('log/{releaseId}', 'DeployController@showLog');
+    $router->post('deploy', 'DeployController@deploy');
+    $router->post('rollback', 'DeployController@rollback');
+    $router->get('log', 'DeployController@showLog');
     $router->get('env', 'DeployController@selectEnv');
     $router->get('branch', 'DeployController@selectBranch');
     $router->get('config', 'DeployController@selectConfigName');
+    $router->post('test', 'DeployController@test');
 });
 
 

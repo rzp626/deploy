@@ -14,6 +14,7 @@ use App\Services\UtilsService;
 use App\DeploymentConfig;
 use Encore\Admin\Admin;
 use Illuminate\Support\Facades\Log;
+use App\Admin\Extensions\DeployRow;
 
 class DeploymentTaskController extends Controller
 {
@@ -129,6 +130,9 @@ class DeploymentTaskController extends Controller
         $grid->created_at('上线时间');
 
         $grid->actions(function (Grid\Displayers\Actions $actions) {
+            $actions->disableView();
+            $actions->disableDelete();
+            $actions->disableEdit();
 
             $status = $actions->row->task_status;
             $taskId = $actions->row->id;
@@ -139,37 +143,35 @@ class DeploymentTaskController extends Controller
             $releaseId = $actions->row->release_id;
             $rollbackId = $id.'-'.$releaseId;
             $releaseStatus = $actions->row->release_status;
-            $aLink = '';
-            $info = '<a href="/admin/log/'.$releaseId.'" class="btn btn-xs btn-info">执行日志</a>&nbsp;&nbsp;&nbsp;&nbsp;';
-            if ($releaseStatus == 1) { // 回滚成功 == 已回滚
-                $aLink = '<span class="btn btn-xs btn-warning">回滚成功</span>';
-            } else if ($releaseStatus == 2) { // 回滚失败
-                $aLink = '<span class="btn btn-xs btn-danger">回滚失败</span>';
-            } else { // 初始状态
-                $maxId = DeploymentTask::getMaxId();
-                if ($taskId == $maxId) {
-                    $aLink = '<span class="btn btn-xs btn-success">发布成功</span>';
-                } else {
-                    $aLink = '<span class="btn btn-xs btn-success">发布成功</span>&nbsp;&nbsp;&nbsp;&nbsp; <a  href="/admin/rollback/'.$rollbackId.'" class="btn btn-xs btn-primary grid-refresh"><i class="fa fa-refresh"></i> 回滚</a>';
-                }
-            }
-
+            $info = '<a href="/admin/log/?id='.$releaseId.'" class="btn btn-xs btn-info">执行日志</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+//            $rollbackLink = '<a  href="/admin/rollback/\'.$rollbackId.\'" class="btn btn-xs btn-primary grid-refresh grid-check-row-{$rollbackId}" data-id="{$rollbackId}"><i class="fa fa-refresh"></i> 回滚</a>';
+            $rollbackLink = "<a class='btn btn-xs btn-primary grid-refresh grid-check-row-{$rollbackId}' data-id='{$rollbackId}'><i class='fa fa-refresh'></i> 回滚</a>";
 
             if ($status == 1) {
-                $actions->disableView();
-                $actions->disableDelete();
-                $actions->disableEdit();
-                $url = "<a href='/admin/deploy/$id' class='btn btn-xs btn-info'>点击发布</a>";
-                $actions->append($url);
+//                $url = "<a href='/admin/deploy/$id' class='btn btn-xs btn-info grid-check-row-{$id}'>点击发布</a>";
+                $url = "<a class='btn btn-xs btn-info grid-check-row-{$id}' data-id='{$id}'>点击发布</a>";
+                $actions->append(new DeployRow($id, 'deploy', $url));
             } else if ($status ==2 ){
-                $actions->disableDelete();
-                $actions->disableEdit();
-                $actions->disableView();
-                $actions->append($info.$aLink);
+                $actions->append($info); // 看执行log
+
+                if ($releaseStatus == 1) { // 回滚成功 == 已回滚
+                    $aLink = '<span class="btn btn-xs btn-warning">回滚成功</span>&nbsp;&nbsp;&nbsp;&nbsp;';
+                    $actions->append($aLink);
+                } else if ($releaseStatus == 2) { // 回滚失败
+                    $aLink = '<span class="btn btn-xs btn-danger">回滚失败</span>&nbsp;&nbsp;&nbsp;&nbsp;';
+                    $actions->append($aLink);
+                } else {
+                    $maxId = DeploymentTask::getMaxId();
+                    if ($taskId == $maxId) {
+                        $aLink = '<span class="btn btn-xs btn-success">发布成功</span>';
+                        $actions->append($aLink);
+                    } else {
+                        $aLink = '<span class="btn btn-xs btn-success">发布成功</span>&nbsp;&nbsp;&nbsp;&nbsp;';
+                        $actions->append($aLink);
+                        $actions->append(new DeployRow($rollbackId, 'rollback', $rollbackLink));
+                    }
+                }
             } else if ($status == 3) {
-                $actions->disableView();
-                $actions->disableDelete();
-                $actions->disableEdit();
                 $url = "<span class='btn btn-xs btn-danger'>发布失败</span>";
                 $actions->append($info.$url);
             }
@@ -183,16 +185,6 @@ class DeploymentTaskController extends Controller
                 $batch->disableDelete();
             });
         });
-
-//        $grid->actions(function (Grid\Displayers\Actions $actions) use($user) {
-//            if (!$user->user()->can('delete-image')) {
-//                $actions->disableDelete();
-//            }
-//            if (($actions->row->operator) != ($user->user()->username)) {
-//                $actions->disableEdit();
-//            }
-//
-//        });
 
         $grid->filter(function ($filter) {
             $filter->between('created_at', '创建日期')->datetime();

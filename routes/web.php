@@ -21,3 +21,6 @@
 Route::get('/', 'CasController@login');
 Route::get('logout', 'CasController@logout');
 Route::get('test', 'CasController@test');
+Route::get('page', 'ShowPageController@test');
+
+//Route::post('test', 'CasController@logout');

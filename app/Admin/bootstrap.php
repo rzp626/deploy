@@ -19,3 +19,7 @@
  */
 
 Encore\Admin\Form::forget(['map', 'editor']);
+
+//Admin::css('path/to/your/css');
+Admin::js('js/loadingoverlay.min.js');
+
