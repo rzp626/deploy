@@ -62,20 +62,24 @@ $(ele).on('click', function() {
         },
         success: function(data) {
             $.LoadingOverlay("hide", true);
-//            console.log(data.code);
-//            console.log(data.msg);
-//            console.log(data.page);
             if (typeof data.code != undefined && data.code == 200) { // 成功了
                  alert(data.msg);
             } else if (typeof data.code != undefined && data.code == 400) { // 失败了
                  alert(data.msg);
-            }         
-            // 页面跳转
+            } else {
+                location.reload(true);
+                return true;
+            }        
+//            location.reload(true);
             window.location.href="/page?data="+data.page; 
+//            setInterval(function(){
+//                window.location.reload();
+//            },5000)
         },
         error: function(data) {
+            $.LoadingOverlay("hide", true);
             alert(data);
-        }
+        },
     });
 });
 SCRIPT;

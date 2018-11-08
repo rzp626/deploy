@@ -13,10 +13,10 @@ class CreateDeploymentConifgsTable extends Migration
      */
     public function up()
     {
-        Schema::create('deployment_conifgs', function (Blueprint $table) {
-            $table->increments('id');
-            $table->timestamps();
-        });
+        Schema::dropIfExists('deployment_conifgs');
+//        Schema::create('deployment_conifgs', function (Blueprint $table) {
+//
+//        });
     }
 
     /**

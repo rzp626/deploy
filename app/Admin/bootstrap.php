@@ -20,6 +20,7 @@
 
 Encore\Admin\Form::forget(['map', 'editor']);
 
+app('view')->prependNamespace('admin', resource_path('views/admin'));
 //Admin::css('path/to/your/css');
 Admin::js('js/loadingoverlay.min.js');
 

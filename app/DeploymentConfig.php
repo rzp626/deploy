@@ -81,7 +81,9 @@ class DeploymentConfig extends Model
     }
 
     public function setConfigExludeAttribute($value){
-        $this->attributes['config_exlude'] =trim(implode("|",$value),',');
+        if (!empty($value)) {
+            $this->attributes['config_exlude'] =trim(implode("|",$value),',');
+        }
     }
 
     public function deployTask()
@@ -103,5 +105,11 @@ class DeploymentConfig extends Model
     public static function getConfigData($id)
     {
         return self::find($id, ['id', 'config_name', 'config_env', 'config_branch']);
+    }
+
+
+    public static function getRemoteDir($id)
+    {
+        $arr = self::find($id, ['config_hosts']);
     }
 }
