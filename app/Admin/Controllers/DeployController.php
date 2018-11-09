@@ -221,6 +221,7 @@ class DeployController extends Controller
 
         $info = DeploymentConfig::where('id', $ids['configId'])->first();
         $config_hosts = $info->config_hosts; // 远程主机地址
+        $config_hosts_path = rtrim($info->config_host_path, '/'); // 远程主机目录
         $config_path = $info->config_from;
         chdir($config_path);
         Log::info('now the path== '.getcwd());
@@ -239,9 +240,20 @@ class DeployController extends Controller
             // 分别清除各个主机opcache
             $dirArr = explode('|', $config_hosts);
             foreach ($dirArr as $dir) {
-                exec('ssh root@'.$dir.' -p 26 "cd /data0/web/lite/current;/usr/local/sina_mobile/php7/bin/php cachetool opcache:reset --fcgi=127.0.0.1:9000"', $output, $result);
+                if (false !== strpos($dir, ':')) {
+                    $realDir = explode(":", $dir);
+                    $path = $realDir[0];
+                } else {
+                    $path = $dir;
+                }
+
+                $cmd = "ssh root@$path -p 26 'cd $config_hosts_path/current;/usr/local/sina_mobile/php7/bin/php cachetool opcache:reset --fcgi=127.0.0.1:9000'";
+                Log::info('the rollback opcache cmd: '.$cmd);
+                exec($cmd, $output, $result);
                 if ((int)$result !== 0) {
                     Log::info('the '.$dir.' clear opcache failed. the outputis'.json_encode($output).', the return value is '.$result);
+                } else {
+                    Log::info('Rollback to clear opcache successfully, the return value is '.$result);
                 }
             }
         } else {
