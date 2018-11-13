@@ -10,6 +10,7 @@ class DeploymentTask extends Model
 {
     //max id
     protected static $mid;
+    protected static $userInfo = null;
 
     public function deploy_config()
     {
@@ -41,5 +42,26 @@ class DeploymentTask extends Model
         }
 
         return self::$mid;
+    }
+
+    
+    /**
+    * 获取审批用户id
+    *
+    * @return array
+    */
+    public static function getUserInfo()
+    {
+        if (!empty(self::$userInfo)) {
+            return self::$userInfo;
+        }
+
+        $tmpInfo = DB::table('admin_users')->select('id', 'username', 'name')->get();
+        $i = 0;
+        foreach ($tmpInfo as $user) {
+            self::$userInfo[$user->id] = $user->name;
+        }
+
+        return self::$userInfo;
     }
 }

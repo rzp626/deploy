@@ -124,5 +124,18 @@ return [
         'uid' => '',
         'erpname' => '',
     ],
+
+    'php_path' => [
+        'test' => '/usr/local/opt/php@7.1/bin/php',
+        'production' => '/usr/local/sina_mobile/php7/bin/php',
+    ],
+
+    'review' => [
+        'status' => [
+            0 => '审核中',
+            1 => '审核未通过',
+            2 => '审核通过',
+        ],
+    ],
 ];
 

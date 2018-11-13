@@ -42,8 +42,8 @@ class DeploymentConfigController extends Controller
     {
         $arr = config('deployment.deploy_config');
         return $content
-            ->header('列表')
-            ->description('列表详情')
+            ->header('配置列表')
+            ->description('')
             ->body($this->grid($arr));
     }
 

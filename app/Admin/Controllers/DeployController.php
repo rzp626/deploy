@@ -8,6 +8,7 @@ use App\Services\UtilsService;
 use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
 use Log;
+use App\Jobs\DeployOptJob;
 set_time_limit(0);
 //sleep(15);
 
@@ -130,6 +131,14 @@ class DeployController extends Controller
             exit;
         }
 
+        $res = $this->dispatch(new DeployOptJob('deploy', $params));
+        Log::info('the res: '.print_r($res, true));
+        $data = [
+            'code' => '200',
+            'msg' => '发布队列添加成功',
+        ];
+        return response()->json($data);
+
         $this->currentOp = 'deploy';
         $taskBranchArr = config('deployment.deploy_config.task_branch');
         $taskEnvArr = config('deployment.deploy_config.task_env');
@@ -204,6 +213,16 @@ class DeployController extends Controller
             echo "<script>alert('回滚参数有误，请检查.');location.href='".$_SERVER["HTTP_REFERER"]."';</script>";
             exit;
         }
+
+        $res = $this->dispatch(new DeployOptJob('releases:rollback', $ids));
+        Log::info('the res: '.json_encode($res));
+        $data = [
+            'code' => '200',
+            'msg' => '发布队列添加成功',
+        ];
+        return response()->json($data);
+        return $releaseId;
+
 
         $this->currentOp = 'rollback';
         $taskBranchArr = config('deployment.deploy_config.task_branch');

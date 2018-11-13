@@ -15,6 +15,8 @@ use App\DeploymentConfig;
 use Encore\Admin\Admin;
 use Illuminate\Support\Facades\Log;
 use App\Admin\Extensions\DeployRow;
+use Encore\Admin\Auth\Permission;
+use Exception;
 
 class DeploymentTaskController extends Controller
 {
@@ -44,8 +46,8 @@ class DeploymentTaskController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->header('部署任务')
-            ->description('列表')
+            ->header('工单列表')
+            ->description('')
             ->body($this->grid());
     }
 
@@ -88,8 +90,8 @@ class DeploymentTaskController extends Controller
     public function create(Content $content)
     {
         return $content
-            ->header('新增任务')
-            ->description('新增部署任务')
+            ->header('新增发单')
+            ->description('task')
             ->body($this->form());
     }
 
@@ -134,47 +136,53 @@ class DeploymentTaskController extends Controller
             $actions->disableDelete();
             $actions->disableEdit();
 
-            $status = $actions->row->task_status;
-            $taskId = $actions->row->id;
-            $env_id = $actions->row->task_env;
-            $branch_id = $actions->row->task_branch;
-            $config_id = $actions->row->config_id;
-            $id = $taskId.'-'.$env_id.'-'.$branch_id.'-'.$config_id;
-            $releaseId = $actions->row->release_id;
-            $rollbackId = $id.'-'.$releaseId;
-            $releaseStatus = $actions->row->release_status;
-            $info = '<a href="/admin/log/?id='.$releaseId.'" class="btn btn-xs btn-info">执行日志</a>&nbsp;&nbsp;&nbsp;&nbsp;';
-//            $rollbackLink = '<a  href="/admin/rollback/\'.$rollbackId.\'" class="btn btn-xs btn-primary grid-refresh grid-check-row-{$rollbackId}" data-id="{$rollbackId}"><i class="fa fa-refresh"></i> 回滚</a>';
-            $rollbackLink = "<a class='btn btn-xs btn-primary grid-refresh grid-check-row-{$rollbackId}' data-id='{$rollbackId}'><i class='fa fa-refresh'></i> 回滚</a>";
+            $review_status = $actions->row->review_status;
+            if ($review_status == 0) { // 审核中
+                $actions->append('<span class="btn btn-xs btn-danger">审核中</span>');
+                // 可以加一个邮件催促提醒审核过程
+            } else if ($review_status == 1) { // 审核未通过
+                $actions->append('<span class="btn btn-xs btn-danger">审核未通过，请重新发单</span>');
+            } else if ($review_status == 2) { // 审核通过
+                $status = $actions->row->task_status;
+                $taskId = $actions->row->id;
+                $env_id = $actions->row->task_env;
+                $branch_id = $actions->row->task_branch;
+                $config_id = $actions->row->config_id;
+                $id = $taskId.'-'.$env_id.'-'.$branch_id.'-'.$config_id;
+                $releaseId = $actions->row->release_id;
+                $rollbackId = $id.'-'.$releaseId;
+                $releaseStatus = $actions->row->release_status;
+                $info = '<a href="/admin/log/?id='.$releaseId.'" class="btn btn-xs btn-info">执行日志</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+                $rollbackLink = "<a class='btn btn-xs btn-primary grid-refresh grid-check-row-{$rollbackId}' data-id='{$rollbackId}'><i class='fa fa-refresh'></i> 回滚</a>";
 
-            if ($status == 1) {
-//                $url = "<a href='/admin/deploy/$id' class='btn btn-xs btn-info grid-check-row-{$id}'>点击发布</a>";
-                $url = "<a class='btn btn-xs btn-info grid-check-row-{$id}' data-id='{$id}'>点击发布</a>";
-                $actions->append(new DeployRow($id, 'deploy', $url));
-            } else if ($status ==2 ){
-                $actions->append($info); // 看执行log
-
-                if ($releaseStatus == 1) { // 回滚成功 == 已回滚
-                    $aLink = '<span class="btn btn-xs btn-warning">回滚成功</span>&nbsp;&nbsp;&nbsp;&nbsp;';
-                    $actions->append($aLink);
-                } else if ($releaseStatus == 2) { // 回滚失败
-                    $aLink = '<span class="btn btn-xs btn-danger">回滚失败</span>&nbsp;&nbsp;&nbsp;&nbsp;';
-                    $actions->append($aLink);
-                } else {
-                    $maxId = DeploymentTask::getMaxId();
-                    if ($taskId == $maxId) {
-                        $aLink = '<span class="btn btn-xs btn-success">发布成功</span>';
+                if ($status == 1) {
+                    $url = "<a class='btn btn-xs btn-info grid-check-row-{$id}' data-id='{$id}'>点击发布</a>";
+                    $actions->append(new DeployRow($id, 'deploy', $url));
+                } else if ($status ==2 ){
+                    $actions->append($info); // 看执行log
+                    if ($releaseStatus == 1) { // 回滚成功 == 已回滚
+                        $aLink = '<span class="btn btn-xs btn-warning">回滚成功</span>&nbsp;&nbsp;&nbsp;&nbsp;';
+                        $actions->append($aLink);
+                    } else if ($releaseStatus == 2) { // 回滚失败
+                        $aLink = '<span class="btn btn-xs btn-danger">回滚失败</span>&nbsp;&nbsp;&nbsp;&nbsp;';
                         $actions->append($aLink);
                     } else {
-                        $aLink = '<span class="btn btn-xs btn-success">发布成功</span>&nbsp;&nbsp;&nbsp;&nbsp;';
-                        $actions->append($aLink);
-                        $actions->append(new DeployRow($rollbackId, 'rollback', $rollbackLink));
+                        $maxId = DeploymentTask::getMaxId();
+                        if ($taskId == $maxId) {
+                            $aLink = '<span class="btn btn-xs btn-success">发布成功</span>';
+                            $actions->append($aLink);
+                        } else {
+                            $aLink = '<span class="btn btn-xs btn-success">发布成功</span>&nbsp;&nbsp;&nbsp;&nbsp;';
+                            $actions->append($aLink);
+                            $actions->append(new DeployRow($rollbackId, 'rollback', $rollbackLink));
+                        }
                     }
+                } else if ($status == 3) {
+                    $url = "<span class='btn btn-xs btn-danger'>发布失败</span>";
+                    $actions->append($info.$url);
                 }
-            } else if ($status == 3) {
-                $url = "<span class='btn btn-xs btn-danger'>发布失败</span>";
-                $actions->append($info.$url);
             }
+
         });
 
         $grid->operator('操作人');
@@ -225,37 +233,50 @@ class DeploymentTaskController extends Controller
         $form = new Form(new DeploymentTask);
 
         $form->select('config_id', '项目名')->options('/admin/config')->load('task_env', '/admin/env');
-        $form->text('task_description', '任务名称')->rules('required|min:3');
+        $form->text('task_description', '任务名称')->rules('required|min:1');
         $form->select('task_env', '部署环境')->load('task_branch', '/admin/branch');
         $form->select('task_branch', '选取分支');
         $form->hidden('task_status')->default(1);
-
-        $form->footer(function ($footer) {
-            // 去掉`重置`按钮
-//            $footer->disableReset();
-            // 去掉`提交`按钮
-//            $footer->disableSubmit();
-        });
-
         $form->hidden('operator')->default('');
+        $form->hidden('review_group_member')->default(0);
+        $form->hidden('review_status')->default(0);
+
         $username = $this->user->user()->username;
         if ($username) {
             Log::info('the operator is : '. $username .' The time is '.time());
             $form->input('operator', $username);
         }
+        // 如果当前用户具有审核权限，则直接审核通过。。。
+        if (Permission::check('review')) {
+            $form->input('review_group_member', $this->user->user()->id);
+            $form->input('review_status', 2);
+        } else {
+            $form->select('review_group_member', '审核人')->options('/admin/members');
+            $form->input('review_status', 0);
+        }
 
         $form->saving(function (Form $form) {
-            $error = [];
-            if (empty($form->input('config_id'))) {
-                $error = new MessageBag([
-                    'title' => '操作失败',
-                    'message' => '检查所填写的参数',
-                ]);
+            try {
+                $error = [];
+                if (empty($form->input('config_id')) || empty($form->input('review_group_member'))) {
+                    $error = new MessageBag([
+                        'title' => '操作失败',
+                        'message' => '检查所填写的参数',
+                        ]);
+                }
+                $envStr = $form->input('task_env');
+                $envArr = explode('-', $envStr);
+                $form->input('task_env', $envArr[1]);
+                $form->review_status = 2;
+                Log::info('add task info '.json_encode($form->input(null)));
+            } catch (Exception $e) {
+                Log::info('exception occered,'.$e->getMessage().' please check it.');
+                $error = [
+                    'title' => '新增失败',
+                    'message' => $e->getMessage(),
+                ];
             }
-            $envStr = $form->input('task_env');
-            $envArr = explode('-', $envStr);
-            $form->input('task_env', $envArr[1]);
-
+            
             if (!empty($error)) {
                 return back()->with(compact('error'));
             }
@@ -277,13 +298,8 @@ class DeploymentTaskController extends Controller
                 $retry_time--;
             }
 
-            /*return back()->with(compact('success'));
-            // 返回一个简单response
-            return response('xxxx');
-            // 跳转页面
-            return redirect('/admin/users');
-            // 抛出异常
-            throw new \Exception('出错啦。。。');*/
+            // 发送邮件通知审核人，该审核了. 异步邮件通知，审核人。
+           
         });
 
         return $form;
