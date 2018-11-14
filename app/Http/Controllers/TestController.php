@@ -19,28 +19,25 @@ class TestController extends Controller
      */
     public function mail()
     {
-//        $toArr = [
-//            'php_net@163.com',
-//        ];
-//
-//        foreach ($toArr as $to) {
-//            $job = (new SendMailJob($to));
-//            $this->dispatch($job);
-//        }
-//
-//        echo 'success';
-//
-//    }
+        $toArr = [
+            'php_net@163.com',
+        ];
 
-        $message = 'test';
-        $to = 'php_net@163.com';
-        $subject = '邮件名称';
-        Mail::send(
-            'mails.test',
-            ['content' => $message],
-            function ($message) use ($to, $subject) {
-                $message->to($to)->subject($subject);
-            }
-        );
+        foreach ($toArr as $to) {
+            $job = (new SendMailJob($to));
+            $this->dispatch($job);
+        }
+
+        echo 'success';
+
+//        $to = 'php_net@163.com';
+//        $subject = '邮件名称';
+//        Mail::send(
+//            'mails.active',
+//            ['content' => $message],
+//            function ($message) use ($to, $subject) {
+//                $message->to($to)->subject($subject);
+//            }
+//        );
     }
 }

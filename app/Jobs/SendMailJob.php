@@ -46,7 +46,7 @@ class SendMailJob implements ShouldQueue
         try {
             // 发邮件
             Mail::send('mails.active', ['content' => 'this is a test Email ! by rzp !!!'], function ($m) use($to) {
-                $m->from('php_net@163.com', '项目名称6666')
+                $m->from('bruisebd@163.com', '项目名称6666')
                     ->to($to)
                     ->subject('邮件主题-mail');
             });
