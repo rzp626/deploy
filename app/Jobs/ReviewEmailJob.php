@@ -14,6 +14,9 @@ class ReviewEmailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    // 发件代理
+    const SEND_MAIL_M = 'dau_monitor@vip.sina.com';
+
     // 发件人
     private $user;
 
@@ -24,7 +27,7 @@ class ReviewEmailJob implements ShouldQueue
      */
     public function __construct($user)
     {
-        $this->user = $user.'@staff.weibo.com';
+        $this->user = $user;
     }
 
     /**
@@ -41,7 +44,7 @@ class ReviewEmailJob implements ShouldQueue
             // 收件人
             $emailArr = config('review.email');
             $to = implode(',', $emailArr);
-            $from = $this->user;
+            $from = self::SEND_MAIL_M;
             $subject = 'UG上线平台，发单审批';
             $msg = $this->getMessage();
             $emailObj = CMailFileService::getInstance($subject, $to, $from, $msg, true);
