@@ -19,7 +19,6 @@ class ReviewEmailJob implements ShouldQueue
 
     // 发件人
     private $user;
-
     /**
      * Create a new job instance.
      *
