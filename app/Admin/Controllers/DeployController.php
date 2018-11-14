@@ -135,7 +135,7 @@ class DeployController extends Controller
         Log::info('the res: '.print_r($res, true));
         $data = [
             'code' => '200',
-            'msg' => '发布队列添加成功',
+            'msg' => '发布队列添加成功，执行中，请稍后刷新页面查看结果',
         ];
         return response()->json($data);
 
@@ -218,7 +218,7 @@ class DeployController extends Controller
         Log::info('the res: '.json_encode($res));
         $data = [
             'code' => '200',
-            'msg' => '发布队列添加成功',
+            'msg' => '回滚队列添加成功，等待执行结果',
         ];
         return response()->json($data);
         return $releaseId;
