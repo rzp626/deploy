@@ -123,8 +123,8 @@ class DeployOptJob implements ShouldQueue
         // 测试环境下的php路径
         $phpPathArr = config('deployment.php_path');
         Log::info('the php path '.print_r($phpPathArr, true));
-        $phpPath = $phpPathArr['test'];
-//        $phpPath = config('deployment.php_path.production');
+//        $phpPath = $phpPathArr['test']; // 本地
+        $phpPath = $phpPathArr['production']; // 线上
 
         $cmd = ['nohup', $phpPath, $vendorMageBin, $this->action, $env_name];
         Log::info('the cmd info: '.json_encode($cmd));
