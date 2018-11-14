@@ -142,7 +142,7 @@ class DeploymentConfigController extends Controller
                 $actions->disableDelete();
             }
 
-            $actions->append(new CheckRow($actions->getKey()));
+//            $actions->append(new CheckRow($actions->getKey()));
         });
 
         return $grid;
