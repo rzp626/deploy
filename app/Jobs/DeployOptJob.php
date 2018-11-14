@@ -13,9 +13,7 @@ use DB;
 use App\DeploymentTask;
 use App\DeploymentConfig;
 use Exception;
-
 set_time_limit(0);
-//sleep(20);
 
 class DeployOptJob implements ShouldQueue
 {

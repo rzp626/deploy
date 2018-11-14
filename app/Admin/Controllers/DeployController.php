@@ -131,8 +131,8 @@ class DeployController extends Controller
             exit;
         }
 
-        $res = $this->dispatch(new DeployOptJob('deploy', $params));
-        Log::info('the res: '.print_r($res, true));
+        $this->dispatch(new DeployOptJob('deploy', $params));
+//        Log::info('the res: '.print_r($res, true));
         $data = [
             'code' => '200',
             'msg' => '发布队列添加成功，执行中，请稍后刷新页面查看结果',
