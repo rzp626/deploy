@@ -34,7 +34,7 @@ class ReviewEmailJob implements ShouldQueue
      */
     public function handle()
     {
-        if (empty($this->user) || empty($this->subject)) {
+        if (empty($this->user)) {
             Log::info('Review email params were wrong. the user or the subject is empty, please check it.');
         }
         try {
