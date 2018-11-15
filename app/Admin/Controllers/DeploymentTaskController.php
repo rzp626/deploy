@@ -237,28 +237,28 @@ class DeploymentTaskController extends Controller
 	 */
 	protected function form() {
 		$form = new Form(new DeploymentTask);
+
+        // 如果当前用户具有审核权限，则直接审核通过。。。
+        if ($this->user->user()->inRoles(['administrator', 'review'])) {
+            $form->input('review_group_member', $this->user->user()->id);
+            $form->hidden('review_status')->default(0);
+            $form->input('review_status', 2);
+        } else {
+			$form->select('review_group_member', '审核人')->options('/admin/dp/members');
+            $form->hidden('review_status')->default(0);
+            $form->input('review_status', 0);
+        }
 		$form->select('config_id', '项目名')->options('/admin/dp/config')->load('task_env', '/admin/dp/env');
 		$form->text('task_description', '任务名称')->rules('required|min:1');
 		$form->select('task_env', '部署环境')->load('task_branch', '/admin/dp/branch');
 		$form->select('task_branch', '选取分支');
 		$form->hidden('task_status')->default(0);
 		$form->hidden('operator')->default('');
-		$form->hidden('review_group_member')->default(0);
-		$form->hidden('review_status')->default(0);
 
 		$username = $this->user->user()->username;
 		if ($username) {
 			Log::info('the operator is : ' . $username . ' The time is ' . time());
 			$form->input('operator', $username);
-            $form->input('review_group_member', 0);
-		}
-		// 如果当前用户具有审核权限，则直接审核通过。。。
-		if (Permission::check('review')) {
-			$form->input('review_group_member', $this->user->user()->id);
-			$form->input('review_status', 2);
-		} else {
-			$form->select('review_group_member', '审核人')->options('/admin/dp/members');
-			$form->input('review_status', 0);
 		}
 
 		$form->saving(function (Form $form) {
