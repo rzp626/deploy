@@ -20,14 +20,18 @@ class ReviewEmailJob implements ShouldQueue
 
     // 发件人
     private $user;
+
+    // 发布类型，取决于发布正文
+    private $type;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($user)
+    public function __construct($user, $type)
     {
         $this->user = $user;
+        $this->type = ucfirst($type);
     }
 
     /**
@@ -46,8 +50,8 @@ class ReviewEmailJob implements ShouldQueue
             $to = implode(',', $emailArr);
             $from = self::SEND_MAIL_M;
             $subject = 'UG上线平台，发单审批';
-            $msg = $this->getMessage();
-//            $emailObj = CMailFileService::getInstance($subject, $to, $from, $msg, true);
+            $func = 'get'.$this->type.'Message()';
+            $msg = $this->$func;
             $emailObj = InterSendMailService::getEmailInstance($to, $subject, $msg, true);
             $emailObj->sendfile();
         } catch (\Exception $e) {
@@ -59,15 +63,40 @@ class ReviewEmailJob implements ShouldQueue
         return true;
     }
 
-    private function getMessage()
+    /**
+     * 执行发单邮件审批
+     *
+     * @return string
+     */
+    private function getDeployMessage()
     {
         return <<<EOF
 <html>
     <head><meta charset='utf-8'></head>
     <body>
-        <h3>来自 {$this->user} 的一封审核邮件:</h3>
+        <h3>来自 {$this->user} 的一封项目发布审核邮件:</h3>
         <div style='padding-left:20px;padding-top:5px;font-size:1em;'>
             <strong>审批内容：</strong><a href="http://deploy.ug.edm.weibo.cn/admin/review" target='_blank'>审批项目，请及时回复!</a><br>
+        </div>
+    </body>
+</html>
+EOF;
+    }
+
+    /**
+     * 执行回滚动作时，邮件提示
+     *
+     * @return string
+     */
+    private function getRollbackMessage()
+    {
+        return <<<EOF
+<html>
+    <head><meta charset='utf-8'></head>
+    <body>
+        <h3>来自 {$this->user} 的一封项目回滚邮件:</h3>
+        <div style='padding-left:20px;padding-top:5px;font-size:1em;'>
+            <strong>项目回滚，请观察回滚影响!<br>
         </div>
     </body>
 </html>

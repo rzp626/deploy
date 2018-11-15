@@ -304,7 +304,7 @@ class DeploymentTaskController extends Controller {
 				$retry_time--;
 			}
 
-			$this->dispatch(new ReviewEmailJob($user));
+			$this->dispatch(new ReviewEmailJob($user, 'deploy'));
 		});
 
 		return $form;
