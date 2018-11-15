@@ -11,14 +11,14 @@ Route::group([
     'middleware'    => config('admin.route.middleware'),
 ], function (Router $router) {
     $router->get('/', 'HomeController@index');
-    $router->resource('deployments', DeploymentTaskController::class);
-    $router->resource('deploymentConfig', DeploymentConfigController::class);
-    $router->post('deploy', 'DeployController@deploy');
-    $router->post('rollback', 'DeployController@rollback');
-    $router->get('log', 'DeployController@showLog');
-    $router->get('env', 'DeployController@selectEnv');
-    $router->get('branch', 'DeployController@selectBranch');
-    $router->get('config', 'DeployController@selectConfigName');
+    $router->resource('deployment', DeploymentTaskController::class);
+    $router->resource('deployment_config', DeploymentConfigController::class);
+    $router->post('dp/deploy', 'DeployController@deploy');
+    $router->post('dp/rollback', 'DeployController@rollback');
+    $router->get('dp/log', 'DeployController@showLog');
+    $router->get('dp/env', 'DeployController@selectEnv');
+    $router->get('dp/branch', 'DeployController@selectBranch');
+    $router->get('dp/config', 'DeployController@selectConfigName');
     $router->post('test', 'DeployController@test');
 
     // 审核工单

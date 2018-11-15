@@ -540,7 +540,6 @@ class DeploymentConfigController extends Controller
 
         });
 
-
         // 成功写表后的操作, 生产magephp部署的配置文件
         $form->saved(function (Form $form) {
             $retry_time = 3;

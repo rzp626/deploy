@@ -150,7 +150,7 @@ class DeploymentTaskController extends Controller {
 				$releaseId = $actions->row->release_id;
 				$rollbackId = $id . '-' . $releaseId;
 				$releaseStatus = $actions->row->release_status;
-				$info = '<a href="/admin/log/?id=' . $releaseId . '" class="btn btn-xs btn-info">执行日志</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+				$info = '<a href="/admin/dp/log/?id=' . $releaseId . '" class="btn btn-xs btn-info">执行日志</a>&nbsp;&nbsp;&nbsp;&nbsp;';
 				$rollbackLink = "<a class='btn btn-xs btn-primary grid-refresh grid-check-row-{$rollbackId}' data-id='{$rollbackId}'><i class='fa fa-refresh'></i> 回滚</a>";
 
 				if ($status == 0) {
@@ -237,9 +237,9 @@ class DeploymentTaskController extends Controller {
 	protected function form($action = 'create') {
 		$form = new Form(new DeploymentTask);
 
-		$form->select('config_id', '项目名')->options('/admin/config')->load('task_env', '/admin/env');
+		$form->select('config_id', '项目名')->options('/admin/dp/config')->load('task_env', '/admin/dp/env');
 		$form->text('task_description', '任务名称')->rules('required|min:1');
-		$form->select('task_env', '部署环境')->load('task_branch', '/admin/branch');
+		$form->select('task_env', '部署环境')->load('task_branch', '/admin/dp/branch');
 		$form->select('task_branch', '选取分支');
 		$form->hidden('task_status')->default(0);
 		$form->hidden('operator')->default('');
