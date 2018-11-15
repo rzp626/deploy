@@ -22,8 +22,8 @@ Route::group([
     $router->post('test', 'DeployController@test');
 
     // 审核工单
-    $router->get('review', 'ReviewController@index');
-    $router->get('members', 'ReviewController@getReviewers');
+    $router->get('dp/review', 'ReviewController@index');
+    $router->get('dp/members', 'ReviewController@getReviewers');
     $router->post('change_review_status', 'ReviewController@changeReviewStatus');
-    $router->get('custom_config', 'CustomConfigController@index');
+    $router->get('dp/custom_config', 'CustomConfigController@index');
 });

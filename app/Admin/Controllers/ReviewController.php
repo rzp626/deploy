@@ -125,10 +125,10 @@ class ReviewController extends Controller {
 	 */
 	public function getReviewers() {
 		// 获取具有审批权限的用户列表
-		$tmpInfo = DB::table('admin_permissions as p')
-			->leftjoin('admin_user_permissions as m', 'p.id', '=', 'm.permission_id')
-			->select('m.user_id as uid')
-			->where('p.slug', 'review')
+		$tmpInfo = DB::table('admin_roles as r')
+			->leftjoin('admin_role_users as u', 'r.id', '=', 'u.role_id')
+			->select('u.user_id as uid')
+			->where('r.slug', 'administrator')
 			->get();
 
 		// 整理userid
@@ -144,6 +144,7 @@ class ReviewController extends Controller {
 			->get();
 		$i = 0;
 		$emailArr = [];
+		$userInfo = [];
 		foreach ($userObj as $user) {
 			$userInfo[$i]['id'] = $user->id;
 			$userInfo[$i]['text'] = $user->username;

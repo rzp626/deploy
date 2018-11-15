@@ -235,9 +235,8 @@ class DeploymentTaskController extends Controller
 	 *
 	 * @return Form
 	 */
-	protected function form($action = 'create') {
+	protected function form() {
 		$form = new Form(new DeploymentTask);
-
 		$form->select('config_id', '项目名')->options('/admin/dp/config')->load('task_env', '/admin/dp/env');
 		$form->text('task_description', '任务名称')->rules('required|min:1');
 		$form->select('task_env', '部署环境')->load('task_branch', '/admin/dp/branch');
@@ -251,13 +250,14 @@ class DeploymentTaskController extends Controller
 		if ($username) {
 			Log::info('the operator is : ' . $username . ' The time is ' . time());
 			$form->input('operator', $username);
+            $form->input('review_group_member', 0);
 		}
 		// 如果当前用户具有审核权限，则直接审核通过。。。
 		if (Permission::check('review')) {
 			$form->input('review_group_member', $this->user->user()->id);
 			$form->input('review_status', 2);
 		} else {
-			$form->select('review_group_member', '审核人')->options('/admin/members');
+			$form->select('review_group_member', '审核人')->options('/admin/dp/members');
 			$form->input('review_status', 0);
 		}
 
@@ -273,7 +273,6 @@ class DeploymentTaskController extends Controller
 				$envStr = $form->input('task_env');
 				$envArr = explode('-', $envStr);
 				$form->input('task_env', $envArr[1]);
-//				$form->review_status = 2;
 				Log::info('add task info ' . json_encode($form->input(null)));
 			} catch (Exception $e) {
 				Log::info('exception occered,' . $e->getMessage() . ' please check it.');

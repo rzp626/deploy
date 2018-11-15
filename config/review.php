@@ -1,8 +1,9 @@
 <?php
 
 return array (
-  'email' =>
-      array (
-          3 => 'zhenpeng8@staff.weibo.com',
-      ),
+  'email' => 
+  array (
+    1 => 'admin@staff.weibo.com',
+    4 => 'zhenpeng8@staff.weibo.com',
+  ),
 );
