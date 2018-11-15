@@ -50,8 +50,8 @@ class ReviewEmailJob implements ShouldQueue
             $to = implode(',', $emailArr);
             $from = self::SEND_MAIL_M;
             $subject = 'UG上线平台，发单审批';
-            $func = 'get'.$this->type.'Message()';
-            $msg = $this->{$func};
+            $func = 'get'.$this->type.'Message';
+            $msg = $this->$func();
             $emailObj = InterSendMailService::getEmailInstance($to, $subject, $msg, true);
             $emailObj->sendfile();
         } catch (\Exception $e) {
