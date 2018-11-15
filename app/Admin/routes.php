@@ -11,7 +11,7 @@ Route::group([
     'middleware'    => config('admin.route.middleware'),
 ], function (Router $router) {
     $router->get('/', 'HomeController@index');
-    $router->resource('task', DeploymentTaskController::class);
+    $router->resource('ts', DeploymentTaskController::class);
     $router->resource('config', DeploymentConfigController::class);
     $router->post('dp/deploy', 'DeployController@deploy');
     $router->post('dp/rollback', 'DeployController@rollback');
