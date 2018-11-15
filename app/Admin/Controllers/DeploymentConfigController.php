@@ -85,7 +85,6 @@ class DeploymentConfigController extends Controller
      */
     public function create(Content $content)
     {
-//        Permission::check('deploy-config');
         return $content
             ->header('新增部署配置')
             ->description('新增部署配置项目')
@@ -287,7 +286,6 @@ class DeploymentConfigController extends Controller
     protected function form()
     {
         $form = new Form(new DeploymentConfig);
-//        $form->disableReset();
         $form->tab('配置基本项', function ($form) {
             $branchArr = config('deployment.deploy_config');
             $form->text('config_name', '项目名')->placeholder('输入配置环境名称')->rules('required|min:3');

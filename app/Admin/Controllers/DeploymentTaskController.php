@@ -20,8 +20,9 @@ use Illuminate\Support\MessageBag;
 use App\Services\CMailFileService;
 use App\Jobs\ReviewEmailJob;
 
-class DeploymentTaskController extends Controller {
-	use HasResourceActions;
+class DeploymentTaskController extends Controller
+{
+    use HasResourceActions;
 
 	private $user;
 
