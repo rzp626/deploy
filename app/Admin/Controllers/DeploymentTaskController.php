@@ -153,18 +153,22 @@ class DeploymentTaskController extends Controller {
 				$info = '<a href="/admin/log/?id=' . $releaseId . '" class="btn btn-xs btn-info">执行日志</a>&nbsp;&nbsp;&nbsp;&nbsp;';
 				$rollbackLink = "<a class='btn btn-xs btn-primary grid-refresh grid-check-row-{$rollbackId}' data-id='{$rollbackId}'><i class='fa fa-refresh'></i> 回滚</a>";
 
-				if ($status == 1) {
-					$url = "<a class='btn btn-xs btn-info grid-check-row-{$id}' data-id='{$id}'>点击发布</a>";
-					$actions->append(new DeployRow($id, 'deploy', $url));
+				if ($status == 0) {
+                    $url = "<a class='btn btn-xs btn-info grid-check-row-{$id}' data-id='{$id}'>点击发布</a>";
+                    $actions->append(new DeployRow($id, 'deploy', $url));
+                } else if ($status == 1) {
+                    // 发布进行中
+                    $aLink = '<span class="btn btn-xs btn-info">发布进行中</span>';
+                    $actions->append($aLink);
 				} else if ($status == 2) {
 					$actions->append($info); // 看执行log
 					if ($releaseStatus == 1) {
 						// 回滚成功 == 已回滚
-						$aLink = '<span class="btn btn-xs btn-warning">回滚成功</span>&nbsp;&nbsp;&nbsp;&nbsp;';
+						$aLink = '<span class="btn btn-xs btn-warning">回滚成功</span>';
 						$actions->append($aLink);
 					} else if ($releaseStatus == 2) {
 						// 回滚失败
-						$aLink = '<span class="btn btn-xs btn-danger">回滚失败</span>&nbsp;&nbsp;&nbsp;&nbsp;';
+						$aLink = '<span class="btn btn-xs btn-danger">回滚失败</span>';
 						$actions->append($aLink);
 					} else {
 						$maxId = DeploymentTask::getMaxId();
@@ -233,7 +237,7 @@ class DeploymentTaskController extends Controller {
 		$form->text('task_description', '任务名称')->rules('required|min:1');
 		$form->select('task_env', '部署环境')->load('task_branch', '/admin/branch');
 		$form->select('task_branch', '选取分支');
-		$form->hidden('task_status')->default(1);
+		$form->hidden('task_status')->default(0);
 		$form->hidden('operator')->default('');
 		$form->hidden('review_group_member')->default(0);
 		$form->hidden('review_status')->default(0);
@@ -264,7 +268,7 @@ class DeploymentTaskController extends Controller {
 				$envStr = $form->input('task_env');
 				$envArr = explode('-', $envStr);
 				$form->input('task_env', $envArr[1]);
-				$form->review_status = 2;
+//				$form->review_status = 2;
 				Log::info('add task info ' . json_encode($form->input(null)));
 			} catch (Exception $e) {
 				Log::info('exception occered,' . $e->getMessage() . ' please check it.');

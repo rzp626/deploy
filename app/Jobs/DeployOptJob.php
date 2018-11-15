@@ -143,7 +143,10 @@ class DeployOptJob implements ShouldQueue
         DB::enableQueryLog();
         $deployModel = DeploymentTask::find($this->params['taskId']);
         $deployModel->released_at = date("Y-m-d H:i:s", time());
-        $deployModel->release_id = $condition['releaseId'];
+        if (!empty($condition) || !empty($condition['releaseId'])) {
+            $deployModel->release_id = $condition['releaseId'];
+        }
+
         if ($this->taskStatus) {
             $deployModel->task_status = $status;
         }
@@ -201,6 +204,8 @@ class DeployOptJob implements ShouldQueue
         $res = DeployServices::doShellCmd($arrCmd);
         if (false === $res) {
             Log::info('the action: '.$this->action.' deploy failed.check it.');
+            $status = 1;
+            $this->modifyStatus($status);
             return false;
         } else if (is_array($res)) {
             Log::info('the acton: '.$this->action.' & the res is: '.json_encode($res));
@@ -212,6 +217,8 @@ class DeployOptJob implements ShouldQueue
 
             $this->modifyStatus($status, $res);
         }
+
+        return true;
     }
 
     /**
@@ -257,5 +264,8 @@ class DeployOptJob implements ShouldQueue
     {
         // 给用户发送失败通知，等等。。。
         Log::info('the queue is failed ,check it ,'.$exception->getMessage());
+        $status = 1;
+        $this->modifyStatus($status);
+        return false;
     }
 }

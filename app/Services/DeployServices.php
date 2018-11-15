@@ -20,45 +20,51 @@ class DeployServices
      */
     public static function doShellCmd($processCmd)
     {
-        $process = new Process($processCmd);
-        $action = $processCmd[3];
-        if (!isset($action) || empty($action)) {
-            Log::info('the prcess wrong action is null|'.$action);
-            return false;
-        }
-        self::$action = $action;
-        $process->setTimeout(360);
-        $process->start();
-        $iterator = $process->getIterator($process::ITER_SKIP_ERR | $process::ITER_KEEP_OUTPUT);
-        $string = '';
-        foreach ($iterator as $data) {
-            if (!self::$releaseId) {
-                $releaseArr = explode(" ", ltrim(trim($data, "\n")));
-                if ($action == self::OPT_DEPLOY) { // 部署
-                    if (false !== strpos($data, "Release ID:")) {
-                        self::$releaseId = !isset($releaseArr[2]) ? null : rtrim($releaseArr[2]);
-                    }
-                } else if ($action == self::OPT_ROLLBACK) { // 回滚
-                    if (false !== strpos($data, "Rollback to")) {
-                        self::$releaseId = !isset($releaseArr[4]) ? null : rtrim($releaseArr[4]);
+        try {
+            $process = new Process($processCmd);
+            $action = $processCmd[3];
+            if (!isset($action) || empty($action)) {
+                Log::info('the prcess wrong action is null|'.$action);
+                return false;
+            }
+            self::$action = $action;
+            $process->setTimeout(360);
+            $process->start();
+            $iterator = $process->getIterator($process::ITER_SKIP_ERR | $process::ITER_KEEP_OUTPUT);
+            $string = '';
+            foreach ($iterator as $data) {
+                if (!self::$releaseId) {
+                    $releaseArr = explode(" ", ltrim(trim($data, "\n")));
+                    if ($action == self::OPT_DEPLOY) { // 部署
+                        if (false !== strpos($data, "Release ID:")) {
+                            self::$releaseId = !isset($releaseArr[2]) ? null : rtrim($releaseArr[2]);
+                        }
+                    } else if ($action == self::OPT_ROLLBACK) { // 回滚
+                        if (false !== strpos($data, "Rollback to")) {
+                            self::$releaseId = !isset($releaseArr[4]) ? null : rtrim($releaseArr[4]);
+                        }
                     }
                 }
+                $string .= $data;
             }
-            $string .= $data;
+
+            // 将输出结果，记录到log中
+            self::getOutputTo($string);
+
+            if (!$process->isSuccessful()) { // deploy 失败，操作失败的提示信息
+                Log::info('error: '.json_encode($process->getErrorOutput()));
+                Log::info(json_encode($processCmd).'执行失败。');
+            }
+
+            return [
+                'releaseId' => self::$releaseId,
+                'logPath' => self::$logPath,
+            ];
+        } catch (\Exception $e) {
+            Log::info('mage op failed, catch the exception info: '.$e->getMessage());
+            return false;
         }
 
-        // 将输出结果，记录到log中
-        self::getOutputTo($string);
-
-        if (!$process->isSuccessful()) { // deploy 失败，操作失败的提示信息
-            Log::info('error: '.json_encode($process->getErrorOutput()));
-            Log::info(json_encode($processCmd).'执行失败。');
-        }
-
-        return [
-            'releaseId' => self::$releaseId,
-            'logPath' => self::$logPath,
-        ];
     }
 
     /**

@@ -131,8 +131,21 @@ class DeployController extends Controller
             exit;
         }
 
+        try {
+            // 修改发布状态为进行中。。
+            $taskModel = DeploymentTask::find($params['taskId']);
+            $taskModel->task_status = 1;
+            $taskModel->save();
+        } catch (\Exception $e) {
+            Log::info('modify the task status failed, the task id: '.json_encode($params));
+            $data = [
+                'code' => '400',
+                'msg' => '发布失败，请重试.',
+            ];
+            return response()->json($data);
+        }
+
         $this->dispatch(new DeployOptJob('deploy', $params));
-//        Log::info('the res: '.print_r($res, true));
         $data = [
             'code' => '200',
             'msg' => '发布队列添加成功，请稍后刷新页面查看结果',
