@@ -201,7 +201,8 @@ class DeployOptJob implements ShouldQueue
             return false;
         }
 
-        $res = DeployServices::doShellCmd($arrCmd);
+        $deployObj = new DeployServices($this->action);
+        $res = $deployObj->doShellCmd($arrCmd);
         if (false === $res) {
             Log::info('the action: '.$this->action.' deploy failed.check it.');
             $status = 1;
@@ -235,7 +236,8 @@ class DeployOptJob implements ShouldQueue
         }
 
         array_push($arrCmd, $this->params['releaseId']);
-        $res = DeployServices::doShellCmd($arrCmd);
+        $rollbackObj = new DeployServices($this->action);
+        $res = $rollbackObj->doShellCmd($arrCmd);
         if (false === $res) {
             Log::info('the action: '.$this->action.' deploy failed.check it.');
             return false;

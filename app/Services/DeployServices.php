@@ -11,37 +11,51 @@ class DeployServices
     const OPT_DEPLOY = 'deploy';
     const OPT_ROLLBACK = 'releases:rollback';
 
-    protected static $releaseId = null;
-    protected static $action = null;
-    protected static $logPath = null;
+    protected $releaseId = null;
+    protected $action = null;
+    protected $logPath = null;
+
+    /**
+     * 获取执行动作
+     *
+     */
+    public function __construct($action)
+    {
+        if (!isset($action) || empty($action)) {
+            Log::info('the prcess wrong action is null|'.$action);
+            return false;
+        }
+
+        $this->action = $action;
+    }
+
     /**
      * @param $processCmd
      * @return bool
      */
-    public static function doShellCmd($processCmd)
+    public function doShellCmd($processCmd)
     {
+        if (empty($processCmd) || !is_array($processCmd)) {
+            Log::info('do cmd params is wrong.check it.');
+            return false;
+        }
+
         try {
             $process = new Process($processCmd);
-            $action = $processCmd[3];
-            if (!isset($action) || empty($action)) {
-                Log::info('the prcess wrong action is null|'.$action);
-                return false;
-            }
-            self::$action = $action;
             $process->setTimeout(360);
             $process->start();
             $iterator = $process->getIterator($process::ITER_SKIP_ERR | $process::ITER_KEEP_OUTPUT);
             $string = '';
             foreach ($iterator as $data) {
-                if (!self::$releaseId) {
+                if (!$this->releaseId) {
                     $releaseArr = explode(" ", ltrim(trim($data, "\n")));
-                    if ($action == self::OPT_DEPLOY) { // 部署
+                    if ($this->action == self::OPT_DEPLOY) { // 部署
                         if (false !== strpos($data, "Release ID:")) {
-                            self::$releaseId = !isset($releaseArr[2]) ? null : rtrim($releaseArr[2]);
+                            $this->releaseId = !isset($releaseArr[2]) ? null : rtrim($releaseArr[2]);
                         }
-                    } else if ($action == self::OPT_ROLLBACK) { // 回滚
+                    } else if ($this->action == self::OPT_ROLLBACK) { // 回滚
                         if (false !== strpos($data, "Rollback to")) {
-                            self::$releaseId = !isset($releaseArr[4]) ? null : rtrim($releaseArr[4]);
+                            $this->releaseId = !isset($releaseArr[4]) ? null : rtrim($releaseArr[4]);
                         }
                     }
                 }
@@ -49,7 +63,7 @@ class DeployServices
             }
 
             // 将输出结果，记录到log中
-            self::getOutputTo($string);
+            $this->getOutputTo($string);
 
             if (!$process->isSuccessful()) { // deploy 失败，操作失败的提示信息
                 Log::info('error: '.json_encode($process->getErrorOutput()));
@@ -57,8 +71,8 @@ class DeployServices
             }
 
             return [
-                'releaseId' => self::$releaseId,
-                'logPath' => self::$logPath,
+                'releaseId' => $this->releaseId,
+                'logPath' => $this->logPath,
             ];
         } catch (\Exception $e) {
             Log::info('mage op failed, catch the exception info: '.$e->getMessage());
@@ -72,14 +86,14 @@ class DeployServices
      *
      * @return string
      */
-    protected static function getOutputTo($string)
+    private function getOutputTo($string)
     {
-        if (!self::$releaseId) {
-             self::$logPath = '/data0/deploy/error/op.output';
+        if (!$this->releaseId) {
+             $this->logPath = '/data0/deploy/error/op.output';
         } else {
-            self::$logPath = '/data0/deploy/opt/'.self::$action.'-releaseId-'.self::$releaseId.'.output';
+            $this->logPath = '/data0/deploy/opt/'.$this->action.'-releaseId-'.$this->releaseId.'.output';
         }
 
-        file_put_contents(self::$logPath, $string);
+        file_put_contents($this->logPath, $string);
     }
 }
