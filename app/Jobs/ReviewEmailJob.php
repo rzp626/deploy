@@ -65,9 +65,9 @@ class ReviewEmailJob implements ShouldQueue
 <html>
     <head><meta charset='utf-8'></head>
     <body>
-        <h4>来自 {$this->user} 的一封审核邮件:</h4>
+        <h3>来自 {$this->user} 的一封审核邮件:</h3>
         <div style='padding-left:20px;padding-top:5px;font-size:1em;'>
-            <strong>审批内容：</strong><a href="/http://deploy.ug.edm.weibo.cn/admin/review">审批项目，请及时回复!</a><br>
+            <strong>审批内容：</strong><a href="http://deploy.ug.edm.weibo.cn/admin/review" target='_blank'>审批项目，请及时回复!</a><br>
         </div>
     </body>
 </html>
