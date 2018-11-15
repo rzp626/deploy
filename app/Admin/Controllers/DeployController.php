@@ -5,7 +5,6 @@ use App\DeploymentConfig;
 use App\DeploymentTask;
 use App\Http\Controllers\Controller;
 use App\Jobs\ReviewEmailJob;
-use App\Jobs\SendMailJob;
 use App\Services\UtilsService;
 use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
@@ -13,7 +12,6 @@ use Log;
 use App\Jobs\DeployOptJob;
 use Encore\Admin\Admin;
 set_time_limit(0);
-//sleep(15);
 
 class DeployController extends Controller
 {
@@ -193,7 +191,7 @@ class DeployController extends Controller
         }
 
         $this->dispatch(new DeployOptJob('releases:rollback', $ids));
-        $this->dispatch(new SendMailJob(new ReviewEmailJob($admin->user()->username, 'rollback')));
+        $this->dispatch(new ReviewEmailJob($admin->user()->username, 'rollback'));
         $data = [
             'code' => '200',
             'msg' => '回滚队列添加成功，等待执行结果',
