@@ -181,7 +181,7 @@ class DeployController extends Controller
             $taskModel->release_status = 3;
             $taskModel->save();
         } catch (\Exception $e) {
-            Log::info('modify the task status failed, the task id: '.json_encode($params));
+            Log::info('modify the task status failed, the task id: '.json_encode($ids));
             $data = [
                 'code' => '400',
                 'msg' => '回滚失败，请重试.',
