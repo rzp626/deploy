@@ -8,6 +8,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Services\CMailFileService;
+use App\Services\InterSendMailService;
 use Log;
 
 class ReviewEmailJob implements ShouldQueue
@@ -46,7 +47,8 @@ class ReviewEmailJob implements ShouldQueue
             $from = self::SEND_MAIL_M;
             $subject = 'UG上线平台，发单审批';
             $msg = $this->getMessage();
-            $emailObj = CMailFileService::getInstance($subject, $to, $from, $msg, true);
+//            $emailObj = CMailFileService::getInstance($subject, $to, $from, $msg, true);
+            $emailObj = InterSendMailService::getEmailInstance($to, $subject, $msg, true);
             $emailObj->sendfile();
         } catch (\Exception $e) {
             Log::info('Review email occured unexcepted, the exception: '.$e->getMessage());
@@ -60,10 +62,15 @@ class ReviewEmailJob implements ShouldQueue
     private function getMessage()
     {
         return <<<EOF
-'{$this->user}'给你发了封发单审核邮件，请第一时间回复下。<br>
-项目所在的路径：<br>
-&nbsp;&nbsp;&nbsp;&nbsp;http://http://deploy.ug.edm.weibo.cn/admin/review<br>
-或者是a连接
+<html>
+    <head><meta charset='utf-8'></head>
+    <body>
+        <h4>来自 {$this->user} 的一封审核邮件:</h4>
+        <div style='padding-left:20px;padding-top:5px;font-size:1em;'>
+            <strong>审批内容：</strong><a href="/http://deploy.ug.edm.weibo.cn/admin/review">审批项目，请及时回复!</a><br>
+        </div>
+    </body>
+</html>
 EOF;
     }
 }
