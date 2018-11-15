@@ -12,7 +12,7 @@ Route::group([
 ], function (Router $router) {
     $router->get('/', 'HomeController@index');
     $router->resource('deployment', DeploymentTaskController::class);
-    $router->resource('deployment_config', DeploymentConfigController::class);
+    $router->resource('config', DeploymentConfigController::class);
     $router->post('dp/deploy', 'DeployController@deploy');
     $router->post('dp/rollback', 'DeployController@rollback');
     $router->get('dp/log', 'DeployController@showLog');
