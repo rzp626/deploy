@@ -71,7 +71,7 @@ $(ele).on('click', function() {
                 location.reload(true);
                 return true;
             }        
-//            location.reload(true);
+            location.reload(true);
 //            window.location.href="/page?data="+data.page; 
 //            setInterval(function(){
 //                window.location.reload();
