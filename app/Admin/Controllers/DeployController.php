@@ -151,58 +151,6 @@ class DeployController extends Controller
             'msg' => '发布队列添加成功，请稍后刷新页面查看结果',
         ];
         return response()->json($data);
-
-        $this->currentOp = 'deploy';
-        $taskBranchArr = config('deployment.deploy_config.task_branch');
-        $taskEnvArr = config('deployment.deploy_config.task_env');
-
-        $env_name = $taskEnvArr[$params['envId']];
-        $branch_name = $taskBranchArr[$params['branchId']];
-        $info = DeploymentConfig::where('id', $params['configId'])->first();
-        $config_path = $info->config_from;
-        $config_env = $info->config_env;
-        $config_branch = $info->config_branch;
-        $taskId = $params['taskId'];
-        $vendorMageBin = base_path().'/vendor/bin/mage';
-        if (!file_exists($vendorMageBin)) {
-            echo "magephp可执行文件，未发现，请检查.";
-            exit;
-        }
-
-        chdir($config_path);
-        Log::info('now the path== '.getcwd());
-        $phpPath = $this->getBinPath();
-        $cmd = ['nohup', $phpPath, $vendorMageBin, 'deploy', $env_name];
-        $res = $this->doShellCmd($cmd);
-
-        $task_status = 3; // 执行失败
-        if ($res) { // 执行成功
-            $task_status = 2;
-            $data = [
-                'code' => '200',
-                'msg' => '发布成功',
-                'page' => $this->sendOutputTo,
-            ];
-        } else {
-            $data = [
-                'code' => '400',
-                'msg' => '发布失败',
-                'page' => $this->sendOutputTo,
-            ];
-        }
-
-        // 后面加上sql语句执行的log
-        $deployModel = DeploymentTask::find($taskId);
-        $deployModel->task_status = $task_status;
-        $deployModel->release_id = $this->releaseId;
-        $deployModel->save();
-
-        return response()->json($data);
-
-        // 执行完成后，页面显示
-        $data = $this->readOutput();
-        $data = UtilsService::getFileContent($this->sendOutputTo);
-        return view('deploy.index')->with('data', $data);
     }
 
     /**
@@ -227,85 +175,26 @@ class DeployController extends Controller
             exit;
         }
 
-        $res = $this->dispatch(new DeployOptJob('releases:rollback', $ids));
-        Log::info('the res: '.json_encode($res));
+        try {
+            // 修改发布状态为进行中。。
+            $taskModel = DeploymentTask::find($ids['taskId']);
+            $taskModel->release_status = 3;
+            $taskModel->save();
+        } catch (\Exception $e) {
+            Log::info('modify the task status failed, the task id: '.json_encode($params));
+            $data = [
+                'code' => '400',
+                'msg' => '回滚失败，请重试.',
+            ];
+            return response()->json($data);
+        }
+
+        $this->dispatch(new DeployOptJob('releases:rollback', $ids));
         $data = [
             'code' => '200',
             'msg' => '回滚队列添加成功，等待执行结果',
         ];
         return response()->json($data);
-        return $releaseId;
-
-
-        $this->currentOp = 'rollback';
-        $taskBranchArr = config('deployment.deploy_config.task_branch');
-        $taskEnvArr = config('deployment.deploy_config.task_env');
-
-        $branchName = $taskBranchArr[$ids['branchId']];
-        $env_name = $taskEnvArr[$ids['envId']];
-
-        $taskId = $ids['taskId'];
-        $vendorMageBin = base_path().'/vendor/bin/mage';
-        if (!file_exists($vendorMageBin)) {
-            echo "magephp可执行文件，未发现，请检查.";
-            exit;
-        }
-
-        $info = DeploymentConfig::where('id', $ids['configId'])->first();
-        $config_hosts = $info->config_hosts; // 远程主机地址
-        $config_hosts_path = rtrim($info->config_host_path, '/'); // 远程主机目录
-        $config_path = $info->config_from;
-        chdir($config_path);
-        Log::info('now the path== '.getcwd());
-        $phpPath = $this->getBinPath();
-        $cmd = ['nohup', $phpPath, $vendorMageBin, 'releases:rollback', $env_name, $ids['releaseId']];
-        $res = $this->doShellCmd($cmd);
-
-        $release_status = 2; // 执行失败
-        if ($res) { // 执行成功
-            $release_status = 1;
-            $data = [
-                'code' => '200',
-                'msg' => '回滚成功',
-                'page' => $this->sendOutputTo,
-            ];
-            // 分别清除各个主机opcache
-            $dirArr = explode('|', $config_hosts);
-            foreach ($dirArr as $dir) {
-                if (false !== strpos($dir, ':')) {
-                    $realDir = explode(":", $dir);
-                    $path = $realDir[0];
-                } else {
-                    $path = $dir;
-                }
-
-                $cmd = "ssh root@$path -p 26 'cd $config_hosts_path/current;/usr/local/sina_mobile/php7/bin/php cachetool opcache:reset --fcgi=127.0.0.1:9000'";
-                Log::info('the rollback opcache cmd: '.$cmd);
-                exec($cmd, $output, $result);
-                if ((int)$result !== 0) {
-                    Log::info('the '.$dir.' clear opcache failed. the outputis'.json_encode($output).', the return value is '.$result);
-                } else {
-                    Log::info('Rollback to clear opcache successfully, the return value is '.$result);
-                }
-            }
-        } else {
-            $data = [
-                'code' => '400',
-                'msg' => '回滚失败',
-                'page' => $this->sendOutputTo,
-            ];
-        }
-
-        $deployModel = DeploymentTask::find($taskId);
-        $deployModel->release_status = $release_status;
-        $deployModel->released_at = date("Y-m-d H:i:s", time());
-        $deployModel->save();
-
-        return response()->json($data);
-
-        // 执行完成后，页面显示
-        $data = $this->readOutput();
-        return view('deploy.index')->with('data', $data);
     }
 
     /**

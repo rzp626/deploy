@@ -167,10 +167,14 @@ class DeploymentTaskController extends Controller {
 						$aLink = '<span class="btn btn-xs btn-warning">回滚成功</span>';
 						$actions->append($aLink);
 					} else if ($releaseStatus == 2) {
-						// 回滚失败
-						$aLink = '<span class="btn btn-xs btn-danger">回滚失败</span>';
-						$actions->append($aLink);
-					} else {
+                        // 回滚失败
+                        $aLink = '<span class="btn btn-xs btn-danger">回滚失败</span>';
+                        $actions->append($aLink);
+                    } else if ($releaseStatus == 3) {
+					    // 回滚中
+                        $aLink = '<span class="btn btn-xs btn-info">回滚中</span>';
+                        $actions->append($aLink);
+					} else if ($releaseStatus == 0) {
 						$maxId = DeploymentTask::getMaxId();
 						if ($taskId == $maxId) {
 							$aLink = '<span class="btn btn-xs btn-success">发布成功</span>';
