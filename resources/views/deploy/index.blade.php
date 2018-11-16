@@ -25,7 +25,7 @@
     <!-- /.box-header -->
     <div class="box-body">
         <pre class="output-body">{{ $data }}</pre>
-        <span><a class="btn btn-sm btn-primary grid-refresh" href="{{ url('admin/deployment') }}">返回</a> <div class="btn-group" style="margin-right: 10px" data-toggle="buttons"></div></span>
+        <span><a class="btn btn-sm btn-primary grid-refresh" href="{{ url('admin/dp/ts') }}">返回</a> <div class="btn-group" style="margin-right: 10px" data-toggle="buttons"></div></span>
     </div>
     <!-- /.box-body -->
 </div>
