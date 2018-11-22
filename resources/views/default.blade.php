@@ -93,7 +93,7 @@
         backgroundColor: '#2c343c',
 
         title: {
-            text: 'Customized Pie',
+            text: '行为分布',
             left: 'center',
             top: 20,
             textStyle: {
