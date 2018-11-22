@@ -1,5 +1,5 @@
 @extends ('layouts.dashboard')
-@section('page_heading','Charts')
+@section('page_heading','')
 @section('section')
     <!-- /.row -->
     <div class="col-sm-12">
