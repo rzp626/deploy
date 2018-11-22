@@ -15,6 +15,7 @@ class DefaultController extends Controller
         return $content
             ->header('Dashboard')
             ->description('Overview')
-            ->body(view('index'));
+            ->body(view('default'));
+//        ->body(view('index'));
     }
 }
