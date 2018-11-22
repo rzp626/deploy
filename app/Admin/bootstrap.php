@@ -27,3 +27,4 @@ app('view')->prependNamespace('admin', resource_path('views/admin'));
 
 // js-segment
 Admin::js('js/loadingoverlay.min.js');
+Admin::js('js/echarts.min.js');

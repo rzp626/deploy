@@ -1,3 +1,5 @@
+@extends('layouts.plane')
+@section('body')
 <!-- /.row -->
 <div class="col-sm-12">
     <div class="row">
@@ -200,3 +202,4 @@
         myChart1.setOption(option, true);
     }
 </script>
+{{--@stop--}}
