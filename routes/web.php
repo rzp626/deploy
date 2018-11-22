@@ -25,3 +25,4 @@ Route::get('page', 'ShowPageController@test');
 
 //Route::post('test', 'CasController@logout');
 Route::get('mail', 'TestController@mail');
+Route::get('redis', 'TestController@redisInfo');
