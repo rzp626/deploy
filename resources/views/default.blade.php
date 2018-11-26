@@ -11,7 +11,7 @@
                             <i class="fa fa-comments fa-5x"></i>
                         </div>
                         <div class="col-xs-9 text-right">
-                            <div class="huge">0</div>
+                            <div class="huge">{{ $reviewNum }}</div>
                             <div>今日审核发单!</div>
                         </div>
                     </div>
@@ -33,7 +33,7 @@
                             <i class="fa fa-tasks fa-5x"></i>
                         </div>
                         <div class="col-xs-9 text-right">
-                            <div class="huge">12</div>
+                            <div class="huge">{{ $deployNum }}</div>
                             <div>今日新增发单任务!</div>
                         </div>
                     </div>

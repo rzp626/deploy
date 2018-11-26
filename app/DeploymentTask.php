@@ -2,6 +2,7 @@
 
 namespace App;
 
+use function Couchbase\defaultDecoder;
 use Illuminate\Database\Eloquent\Model;
 use App\DeploymentConfig;
 use DB;
@@ -63,5 +64,36 @@ class DeploymentTask extends Model
         }
 
         return self::$userInfo;
+    }
+
+    /**
+     * 获取今日审核/发单数量
+     *
+     * @param int $type
+     * @return int
+     */
+    public static function getReviewSum()
+    {
+        $startTime = date("Y-m-d", time())." 00:00:00";
+        $stopTime = date("Y-m-d", time())." 23:59:59";
+
+        $ret = [];
+        $deployRet = self::select(DB::raw('count(*) as sum'))->whereBetween('created_at', [$startTime, $stopTime])->get();
+        $reviewRet = self::select(DB::raw('count(*) as sum'))->whereBetween('updated_at', [$startTime, $stopTime])->get();
+        if (!empty($deployRet)) {
+            $ret['deployNum'] = $deployRet[0]->sum;
+
+        }
+
+        if (!empty($reviewRet)) {
+            $ret['reviewNum'] = $reviewRet[0]->sum;
+
+        }
+
+        if (empty($ret)) {
+            Log::info('Query failed, please check it!');
+        }
+
+        return $ret;
     }
 }
