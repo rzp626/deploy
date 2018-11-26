@@ -8,6 +8,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
 use Log;
 use Symfony\Component\HttpFoundation\Request;
@@ -54,6 +55,15 @@ class CasController extends AuthController
                     $url = url('admin');
                     echo "<script>alert('cas登陆失败，请使用账号密码登陆');location.href='".$url."';</script>";
                     exit;
+                }
+
+                // 成功跳转前，增加登录次数
+                if (Cache::has('loginNum')) {
+                    Cache::increment('loginNum');
+                } else {
+                    $endTime = strtotime(date('Y-m-d', time()).' 23:59:59');
+                    $lifeTime = round(($endTime - time()) / 60);
+                    Cache::put('loginNum', 1, $lifeTime);
                 }
 
                 return redirect(url('test/?username='.$username.'&password='.$password));

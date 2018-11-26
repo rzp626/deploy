@@ -55,8 +55,8 @@
                             <i class="fa fa-support fa-5x"></i>
                         </div>
                         <div class="col-xs-9 text-right">
-                            <div class="huge">2</div>
-                            <div>今日登录人数!</div>
+                            <div class="huge">{{ $times }} 次</div>
+                            <div>今日登录次数!</div>
                         </div>
                     </div>
                 </div>
