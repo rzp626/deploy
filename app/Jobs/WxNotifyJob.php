@@ -62,7 +62,7 @@ class WxNotifyJob implements ShouldQueue
         $sendMsg = $this->requestUser.', 你在'.date('Y-m-d H:i:s', time()).'执行了上线发单操作!' ;
         Log::info('Request msg: '. $sendMsg);
 
-        $url = $params['schema'].$params['host'].$params['port'].$params['uri'];
+        $url = $params['schema'].$params['host'].':'.$params['port'].$params['uri'];
         $sendMsgUrl = $url.$this->requestUser . '/' .$sendMsg;;
         $ret = UtilsService::curl($sendMsgUrl);
         if (!isset($ret) || empty($ret)) {
