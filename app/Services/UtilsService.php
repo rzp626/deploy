@@ -418,9 +418,9 @@ class UtilsService {
         //显示获得的数据
         if(false === $data)
         {
-            Log::warning("curl_post_error", ['url' => $url, 'uid' => $uid, 'params' => $data, 'return' => $result, 'curl_errno' => curl_errno($ch), 'curl_error' => curl_error($ch)]);
+            Log::warning("curl_post_error", ['url' => $url, 'return' => $data, 'curl_errno' => curl_errno($curl), 'curl_error' => curl_error($curl)]);
         } else {
-            Log::info("curl_post_info", ['url' => $url, 'uid' => $uid, 'params' => $data, 'return' => $result]);
+            Log::info("curl_post_info", ['url' => $url, 'params' => $data, 'return' => $data]);
 
         }
         //关闭URL请求
