@@ -6,6 +6,7 @@ use App\Admin\Extensions\DeployRow;
 use App\DeploymentConfig;
 use App\DeploymentTask;
 use App\Http\Controllers\Controller;
+use App\Jobs\WxNotifyJob;
 use App\Services\UtilsService;
 use Encore\Admin\Admin;
 use Encore\Admin\Auth\Permission;
@@ -290,6 +291,7 @@ class DeploymentTaskController extends Controller
 		$form->saved(function (Form $form) {
 			// 获取选择的分支、id等，进行操作,增加重试机制retry_times = 3
             $user = $form->model()->operator;
+            $reviewUserId = $form->model()->review_group_member;
             $taskInfo = [
 				'task_id' => $form->model()->id,
 				'task_branch' => $form->model()->task_branch,
@@ -303,8 +305,9 @@ class DeploymentTaskController extends Controller
 				}
 				$retry_time--;
 			}
-
+            $this->dispatch(new WxNotifyJob($user, $reviewUserId));
 			$this->dispatch(new ReviewEmailJob($user, 'deploy'));
+
 		});
 
 		return $form;
