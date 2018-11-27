@@ -238,9 +238,9 @@ class DeploymentTaskController extends Controller
 	 */
 	protected function form() {
 		$form = new Form(new DeploymentTask);
-
         // 如果当前用户具有审核权限，则直接审核通过。。。
         if ($this->user->user()->inRoles(['administrator', 'review'])) {
+            $form->hidden('review_group_member')->default(0);
             $form->input('review_group_member', $this->user->user()->id);
             $form->hidden('review_status')->default(0);
             $form->input('review_status', 2);

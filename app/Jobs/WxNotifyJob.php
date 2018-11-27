@@ -26,7 +26,7 @@ class WxNotifyJob implements ShouldQueue
     public function __construct($requestUser, $responseUserId)
     {
         $this->requestUser = $requestUser;
-        if (!$requestUser || !$responseUserId) {
+        if (empty($requestUser) || empty($responseUserId)) {
             Log::info('Notify the user by wx failed, check the params.');
         }
 
