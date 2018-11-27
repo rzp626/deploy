@@ -350,7 +350,7 @@ class UtilsService {
         }
 
         $result = curl_exec($ch);
-        if(false == $result)
+        if(false === $result)
         {
             Log::warning("curl_get_error", ['url' => $url, 'uid' => $uid, 'return' => $result, 'curl_errno' => curl_errno($ch), 'curl_error' => curl_error($ch)]);
         } else {
@@ -390,7 +390,7 @@ class UtilsService {
         }
 
         $result = curl_exec($ch);
-        if(false == $result)
+        if(false === $result)
         {
             Log::warning("curl_post_error", ['url' => $url, 'uid' => $uid, 'params' => $data, 'return' => $result, 'curl_errno' => curl_errno($ch), 'curl_error' => curl_error($ch)]);
         } else {
@@ -399,6 +399,33 @@ class UtilsService {
         }
         curl_close($ch);
         return $result;
+    }
+
+    public static function curlGet($user, $msg)
+    {
+        $urlPrefix = config('params.wx_params');
+        $url = $urlPrefix['url'].$user.'/'.$msg;
+        //初始化
+        $curl = curl_init();
+        //设置抓取的url
+        curl_setopt($curl, CURLOPT_URL, $url);
+        //设置头文件的信息作为数据流输出
+        curl_setopt($curl, CURLOPT_HEADER, 1);
+        //设置获取的信息以文件流的形式返回，而不是直接输出。
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        //执行命令
+        $data = curl_exec($curl);
+        //显示获得的数据
+        if(false === $data)
+        {
+            Log::warning("curl_post_error", ['url' => $url, 'uid' => $uid, 'params' => $data, 'return' => $result, 'curl_errno' => curl_errno($ch), 'curl_error' => curl_error($ch)]);
+        } else {
+            Log::info("curl_post_info", ['url' => $url, 'uid' => $uid, 'params' => $data, 'return' => $result]);
+
+        }
+        //关闭URL请求
+        curl_close($curl);
+        return $data;
     }
 }
 

@@ -53,26 +53,20 @@ class WxNotifyJob implements ShouldQueue
             return false;
         }
 
-        $params = config('params.wx_params');
-        Log::info('the info is '. json_encode($params));
-
         $receiveMsg = 'Hi '.$this->responseUser.', '.$this->requestUser. '在'. date('Y-m-d H:i:s', time()).'发起了上线发单操作，请及时审核。';
         Log::info('Receive msg: '. $receiveMsg);
 
         $sendMsg = $this->requestUser.', 你在'.date('Y-m-d H:i:s', time()).'执行了上线发单操作!' ;
         Log::info('Request msg: '. $sendMsg);
 
-        $url = $params['schema'].$params['host'].':'.$params['port'].$params['uri'];
-        $sendMsgUrl = $url.$this->requestUser . '/' .urlencode($sendMsg);
-        $ret = UtilsService::requestGet($sendMsgUrl);
+        $ret = UtilsService::curlGet($this->requestUser, urlencode($sendMsg));
         if (!isset($ret) || empty($ret)) {
-            Log::info('Notify the send user failed, by the wx. U can check it. The url is '.$sendMsgUrl);
+            Log::info('Notify the send user failed, by the wx. U can check it.');
         }
 
-        $receiveMsgUrl = $url.$this->responseUser . '/' . urlencode($receiveMsg);
-        $ret = UtilsService::requestGet($receiveMsgUrl);
+        $ret = UtilsService::curlGet($this->responseUser, urlencode($receiveMsg));
         if (!isset($ret) || empty($ret)) {
-            Log::info('Notify the receive user failed, by the wx. U can check it. The url is '. $receiveMsgUrl);
+            Log::info('Notify the receive user failed, by the wx. U can check it.');
         }
     }
 }

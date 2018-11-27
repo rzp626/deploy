@@ -2,9 +2,6 @@
 
 return [
     'wx_params' => [
-        'schema' => 'http://',
-        'host' => '10.77.136.158',
-        'port' => '10086',
-        'uri' => '/messager/send_wx/',
+        'url' => 'http://10.77.136.158:10086/messager/send_wx/',
     ],
 ];
