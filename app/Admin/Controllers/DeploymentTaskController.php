@@ -18,8 +18,8 @@ use Encore\Admin\Show;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
-use App\Services\CMailFileService;
 use App\Jobs\ReviewEmailJob;
+use Illuminate\Support\Facades\Cache;
 
 class DeploymentTaskController extends Controller
 {
@@ -308,6 +308,14 @@ class DeploymentTaskController extends Controller
             $this->dispatch(new WxNotifyJob($user, $reviewUserId));
 			$this->dispatch(new ReviewEmailJob($user, 'deploy'));
 
+			// 统计今日发单数量
+            if (Cache::has('addTaskNum')) {
+                Cache::increment('addTaskNum');
+            } else {
+                $endTime = strtotime(date('Y-m-d', time()).' 23:59:59');
+                $lifeTime = round(($endTime - time()) / 60);
+                Cache::put('addTaskNum', 1, $lifeTime);
+            }
 		});
 
 		return $form;

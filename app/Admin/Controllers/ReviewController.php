@@ -13,6 +13,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\UtilsService;
+use Illuminate\Support\Facades\Cache;
 
 class ReviewController extends Controller {
 	use HasResourceActions;
@@ -114,6 +115,14 @@ class ReviewController extends Controller {
 				'msg' => '审核通过',
 			];
 		}
+        // 统计审核发单数量
+        if (Cache::has('reviewTaskNum')) {
+            Cache::increment('reviewTaskNum');
+        } else {
+            $endTime = strtotime(date('Y-m-d', time()).' 23:59:59');
+            $lifeTime = round(($endTime - time()) / 60);
+            Cache::put('reviewTaskNum', 1, $lifeTime);
+        }
 
 		return response()->json($info);
 	}
