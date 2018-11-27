@@ -413,6 +413,9 @@ class UtilsService {
         curl_setopt($curl, CURLOPT_HEADER, 1);
         //设置获取的信息以文件流的形式返回，而不是直接输出。
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        //函数中加入下面这条语句
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+
         //执行命令
         $data = curl_exec($curl);
         //显示获得的数据
