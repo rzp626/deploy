@@ -28,13 +28,14 @@ class WxNotifyJob implements ShouldQueue
         $this->requestUser = $requestUser;
         if (!$requestUser || !$responseUserId) {
             Log::info('Notify the user by wx failed, check the params.');
-            return false;
         }
 
         $userInfo = DeploymentTask::getUserInfo();
-        if (!($userName = $userInfo[$responseUserId]) || empty($userName)) {
+        Log::info('the user info '.json_encode($userInfo));
+        $userName = $userInfo[$responseUserId];
+        if (!isset($userName) || empty($userName)) {
+            $userName = 'zhenpeng8';
             Log::info('The review user is wrong, please check the params');
-            return false;
         }
 
         $this->responseUser = $userName;
@@ -48,6 +49,9 @@ class WxNotifyJob implements ShouldQueue
     public function handle()
     {
         Log::info('message: the request user is '.$this->requestUser . ' and the response user is '.$this->responseUser);
+        if (empty($this->requestUser) || empty($this->responseUser)) {
+            return false;
+        }
         $params = config('params.wx_params');
         Log::info('the info is '. json_encode($params));
         $receiveMsg = sprintf($params['uri'], $this->responseUser, 'Hi，'.$this->requestUser. '在'. date('Y-m-d H:i:s', time()).'发起了上线发单操作，请及时审核。' );
