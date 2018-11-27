@@ -47,7 +47,7 @@ class WxNotifyJob implements ShouldQueue
      */
     public function handle()
     {
-        Log::info('message: the request user is '.$this->user . ' and the response user is '.$this->responseUser);
+        Log::info('message: the request user is '.$this->requestUser . ' and the response user is '.$this->responseUser);
         $params = config('params.wx_params');
         Log::info('the info is '. json_encode($params));
         $receiveMsg = sprintf($params['uri'], $this->responseUser, 'Hi，'.$this->requestUser. '在'. date('Y-m-d H:i:s', time()).'发起了上线发单操作，请及时审核。' );
