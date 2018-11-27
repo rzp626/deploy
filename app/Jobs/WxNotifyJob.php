@@ -59,12 +59,12 @@ class WxNotifyJob implements ShouldQueue
         $sendMsg = $this->requestUser.', 你在'.date('Y-m-d H:i:s', time()).'执行了上线发单操作!' ;
         Log::info('Request msg: '. $sendMsg);
 
-        $ret = UtilsService::curlGet($this->requestUser, urlencode($sendMsg));
+        $ret = UtilsService::curlGet($this->requestUser, rawurlencode($sendMsg));
         if (!isset($ret) || empty($ret)) {
             Log::info('Notify the send user failed, by the wx. U can check it.');
         }
 
-        $ret = UtilsService::curlGet($this->responseUser, urlencode($receiveMsg));
+        $ret = UtilsService::curlGet($this->responseUser, rawurlencode($receiveMsg));
         if (!isset($ret) || empty($ret)) {
             Log::info('Notify the receive user failed, by the wx. U can check it.');
         }
