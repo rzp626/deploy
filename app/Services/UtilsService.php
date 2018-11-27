@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\Yaml\Yaml;
+use Log;
 
 /**
  * 根据所加任务，修改magephp.yml配置项
@@ -366,9 +366,9 @@ class UtilsService {
         }
 
         $response = curl_exec($ch);
-
+        Log::info('Curl to wx, the response is: '.json_encode($response));
         if ($response === FALSE) {
-            //echo "cURL Error: " . curl_error($ch);
+            Log::info("cURL Error: " . curl_error($ch));
             return false;
         }
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
