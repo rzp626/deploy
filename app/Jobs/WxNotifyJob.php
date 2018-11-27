@@ -64,13 +64,13 @@ class WxNotifyJob implements ShouldQueue
 
         $url = $params['schema'].$params['host'].':'.$params['port'].$params['uri'];
         $sendMsgUrl = $url.$this->requestUser . '/' .urlencode($sendMsg);
-        $ret = UtilsService::curl($sendMsgUrl);
+        $ret = UtilsService::requestGet($sendMsgUrl);
         if (!isset($ret) || empty($ret)) {
             Log::info('Notify the send user failed, by the wx. U can check it. The url is '.$sendMsgUrl);
         }
 
         $receiveMsgUrl = $url.$this->responseUser . '/' . urlencode($receiveMsg);
-        $ret = UtilsService::curl($receiveMsgUrl);
+        $ret = UtilsService::requestGet($receiveMsgUrl);
         if (!isset($ret) || empty($ret)) {
             Log::info('Notify the receive user failed, by the wx. U can check it. The url is '. $receiveMsgUrl);
         }
