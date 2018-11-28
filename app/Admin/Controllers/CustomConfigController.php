@@ -54,4 +54,21 @@ class CustomConfigController extends Controller {
 		return $grid;
 	}
 
+    /**
+     * Add interface.
+     *
+     * @param Content $content
+     * @return Content
+     */
+	public function add(Content $content)
+    {
+        // 先将配置文件，读取，放置到view上，在对其进行更改，保存操作即可生成新的配置文件
+        $config = config('review');
+		return $content
+			->header('新建配置文件')
+			->description('')
+			// ->body($this->grid());
+			->body(view('config.index'));
+    }
+
 }

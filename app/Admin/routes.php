@@ -27,4 +27,5 @@ Route::group([
     $router->get('dp/members', 'ReviewController@getReviewers');
     $router->post('change_review_status', 'ReviewController@changeReviewStatus');
     $router->get('dp/custom_config', 'CustomConfigController@index');
+    $router->get('dp/add_config', 'CustomConfigController@add');
 });

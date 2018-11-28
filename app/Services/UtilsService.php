@@ -327,7 +327,11 @@ class UtilsService {
 	 * @return void
 	 */
 	public static function saveConfig($filename, $content) {
-		file_put_contents($filename, "<?php\n\nreturn " . var_export($content, true) . ';');
+		$intRet = file_put_contents($filename, "<?php\n\nreturn " . var_export($content, true) . ';');
+		if ($intRet === false) {
+		    return false;
+        }
+		return true;
 	}
 
     /**
@@ -429,6 +433,31 @@ class UtilsService {
         //关闭URL请求
         curl_close($curl);
         return $data;
+    }
+
+    /**
+     *
+     * 创建目录，支持递归创建目录
+     * @param String $dirName 要创建的目录
+     * @param int $mode 目录权限
+     */
+    public static function smkdir($dirName , $mode = 0777) {
+
+        $dirs = explode('/' , str_replace('\\' , '/' , $dirName));
+        $dir = '';
+
+        foreach ($dirs as $part) {
+            $dir.=$part . '/';
+            if ( ! is_dir($dir) && strlen($dir) > 0) {
+                if ( ! mkdir($dir , $mode)) {
+                    return false;
+                }
+                if ( ! chmod($dir , $mode)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
 
