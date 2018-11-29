@@ -28,3 +28,4 @@ Route::get('mail', 'TestController@mail');
 Route::get('redis', 'TestController@redisInfo');
 Route::post('validDir', 'ConfigController@validDir');
 Route::post('createFile', 'ConfigController@createFile');
+Route::post('createGroupUser', 'ConfigController@createGroupUser');

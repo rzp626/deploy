@@ -6,6 +6,7 @@ use App\Services\UtilsService;
 use http\Env\Response;
 use Illuminate\Http\Request;
 use Log;
+use DB;
 
 class ConfigController extends Controller
 {
@@ -59,6 +60,10 @@ class ConfigController extends Controller
         return response()->json($data);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function createFile(Request $request)
     {
         $data = [
@@ -93,4 +98,46 @@ class ConfigController extends Controller
         $data['msg'] = '成功创建配置文件';
         return response()->json($data);
     }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createGroupUser(Request $request)
+    {
+        $data = [
+            'code' => 4000,
+            'msg'  => 'Wrong params, check it.',
+        ];
+
+        $groupId = $request->get('groupId');
+        $userId = $request->get('userId');
+        if (!isset($groupId) || empty($groupId) || !isset($userId) || empty($userId)) {
+            return response()->json($data);
+        }
+
+        if (!is_numeric((int)$groupId) || !is_numeric((int)$userId)) {
+            Log::info('the group id: '.$groupId.' and the user id: '.$userId);
+            return response()->json($data);
+        }
+
+        // 添加用户
+        DB::table('admin_group_users')->insert(['user_id' => $userId, 'group_id' => $groupId, 'created_at' => date('Y-m-d H:i:s', time())]);
+
+        $data = [
+            'code' => 2000,
+            'msg' => '成功分配组用户',
+        ];
+        return response()->json($data);
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function isGroupUser(Request $request)
+    {
+
+    }
 }
+
+
