@@ -121,6 +121,13 @@ class ConfigController extends Controller
             return response()->json($data);
         }
 
+        $res = $this->isGroupUser($userId, $groupId);
+        if ($res) {
+            $data['code'] = 5000;
+            $data['msg'] = '该组已有此用户！';
+            return $data;
+        }
+
         // 添加用户
         DB::table('admin_group_users')->insert(['user_id' => $userId, 'group_id' => $groupId, 'created_at' => date('Y-m-d H:i:s', time())]);
 
@@ -134,9 +141,15 @@ class ConfigController extends Controller
     /**
      * @param Request $request
      */
-    public function isGroupUser(Request $request)
+    public function isGroupUser($userId, $groupId)
     {
-
+        $ret = DB::table('admin_group_users')->where('user_id', $userId)->where('group_id', $groupId)->get();
+        $cnt = $ret->count();
+        if ($cnt == 0) {
+            return false;
+        }
+        Log::info('query the same group_user, the result is '. json_encode($ret));
+        return true;
     }
 }
 

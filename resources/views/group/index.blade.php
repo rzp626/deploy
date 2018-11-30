@@ -93,9 +93,28 @@
     $("#myUser").bind('change', function () {
         userNo = $(this).val();
         console.log(userNo);
+        if (typeof groupNo == 'undefined'
+            || groupNo == 0
+            || groupNo.length == 0) {
+            alert('先选择组');
+            return false;
+        }
         if (userNo.length <= 0 || userNo == 0) {
             alert("请选择分配组用户");
             return false;
+        } else {
+            $.ajax({
+                url: '',
+                type: 'POST',
+                data: {'userId': userNo, 'groupId': groupNo},
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
         }
     });
 
