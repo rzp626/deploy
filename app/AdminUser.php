@@ -8,6 +8,7 @@ use Log;
 class AdminUser extends Model
 {
     protected $table = 'admin_users';
+    public static $userInfo = [];
 
     public static function getUserInfo($type=0)
     {
@@ -34,5 +35,23 @@ class AdminUser extends Model
             }
         }
         return $info;
+    }
+
+    public static function getUserOptions()
+    {
+        if (!empty(self::$userInfo)) {
+            return self::$userInfo;
+        }
+
+        $arr = self::select('id', 'name')->get();
+        Log::info('the group info '.print_r($arr, true));
+        if (!isset($arr) || empty($arr))
+            return $arr;
+
+        foreach ($arr as $key => $value) {
+            self::$userInfo[$value->id] = $value->name;
+        }
+
+        return self::$userInfo;
     }
 }

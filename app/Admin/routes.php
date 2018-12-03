@@ -30,4 +30,5 @@ Route::group([
     $router->get('dp/add_config', 'CustomConfigController@add');
     $router->resource('dp/group_manage', GroupManagementController::class);
     $router->get('dp/group_assign', 'GroupManagementController@assign');
+    $router->resource('dp/group_user', GroupUserManagementController::class);
 });

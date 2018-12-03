@@ -8,6 +8,7 @@ use Log;
 class AdminGroup extends Model
 {
     protected $table = 'admin_groups';
+    public static $groupInfo = [];
 
     public static function getGroupInfo()
     {
@@ -26,5 +27,24 @@ class AdminGroup extends Model
             $i++;
         }
         return $info;
+    }
+
+    public static function getGroupOptions()
+    {
+        if (!empty(self::$groupInfo)) {
+            return self::$groupInfo;
+        }
+
+        $arr = self::select('id', 'group_name')->get();
+        Log::info('the group info '.print_r($arr, true));
+        if (!isset($arr) || empty($arr))
+            return $arr;
+
+        $i = 0;
+        foreach ($arr as $key => $value) {
+            self::$groupInfo[$value->id] = $value->group_name;
+        }
+
+        return self::$groupInfo;
     }
 }
