@@ -10,6 +10,9 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
+use Encore\Admin\Auth\Database\Menu;
+use Encore\Admin\Auth\Database\Role;
+
 
 class GroupManagementController extends Controller
 {
@@ -130,6 +133,7 @@ class GroupManagementController extends Controller
 
         $form->text('group_name', '组名字');
         $form->text('group_action', '组用途');
+        $form->multipleSelect('roles', trans('admin.roles'))->options(Role::all()->pluck('name', 'id'));
 
         return $form;
     }

@@ -6,6 +6,7 @@ return [
     'logout'                => '登出',
     'setting'               => '设置',
     'name'                  => '名称',
+    'mobile'                => '手机号码',
     'username'              => '用户名',
     'password'              => '密码',
     'password_confirmation' => '确认密码',

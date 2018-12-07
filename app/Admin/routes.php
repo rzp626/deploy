@@ -31,4 +31,7 @@ Route::group([
     $router->resource('dp/group_manage', GroupManagementController::class);
     $router->get('dp/group_assign', 'GroupManagementController@assign');
     $router->resource('dp/group_user', GroupUserManagementController::class);
+    $router->resource('group/manage', UmGroupController::class);
+    $router->resource('group/action', UmActionController::class);
+    $router->resource('group/strategy', UmStrategyController::class);
 });

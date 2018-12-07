@@ -8,7 +8,7 @@
 
 namespace App\Admin\Extensions\Tools;
 
-use Encore\Admin\Grid\Tools\BatchAction
+use Encore\Admin\Grid\Tools\BatchAction;
 
 class ReleasePost extends BatchAction
 {
