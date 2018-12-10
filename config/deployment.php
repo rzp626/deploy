@@ -127,7 +127,8 @@ return [
 
     'php_path' => [
         'test' => '/usr/local/opt/php@7.1/bin/php',
-        'production' => '/usr/local/sina_mobile/php7/bin/php',
+//        'production' => '/usr/local/sina_mobile/php7/bin/php',
+        'production' => '/usr/local/sina_mobile/php71/bin/php',
     ],
 
     'review' => [
