@@ -155,7 +155,8 @@
                           return false;
                       } else if (data.code == '2000') { // 路径有效
                           alert(data.msg);
-                          window.location.reload();
+                          // window.location.reload();
+                          window.location.href="/admin/dp/list_message";
                           return true;
                       } else if (data.code == '4004') { // 路径无效
                           alert(data.msg);
