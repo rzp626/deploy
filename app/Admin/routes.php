@@ -28,6 +28,8 @@ Route::group([
     $router->post('change_review_status', 'ReviewController@changeReviewStatus');
     $router->get('dp/custom_config', 'CustomConfigController@index');
     $router->get('dp/add_config', 'CustomConfigController@add');
+    $router->get('dp/add_message', 'CustomConfigController@showMessage');
+    $router->get('dp/list_message', 'CustomConfigController@listMessage');
     $router->resource('dp/group_manage', GroupManagementController::class);
     $router->get('dp/group_assign', 'GroupManagementController@assign');
     $router->resource('dp/group_user', GroupUserManagementController::class);

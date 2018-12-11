@@ -7,6 +7,7 @@ use http\Env\Response;
 use Illuminate\Http\Request;
 use Log;
 use DB;
+use Mockery\Exception;
 
 class ConfigController extends Controller
 {
@@ -150,6 +151,51 @@ class ConfigController extends Controller
         }
         Log::info('query the same group_user, the result is '. json_encode($ret));
         return true;
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addMessage(Request $request)
+    {
+        $data = [
+            'code' => 4000,
+            'msg'  => 'Wrong params, check it.',
+        ];
+
+        $name = $request->get('name');
+        $email = $request->get('email');
+        $content = $request->get('content');
+        if ((!isset($name) || empty($name))
+            || (!isset($email) || empty($email))
+            || (!isset($content) || empty($content))) {
+            return response()->json($data);
+        }
+
+        try {
+            // insert into db
+            $data = [
+                'name' => $name,
+                'email' => $email,
+                'content' => $content,
+            ];
+            DB::table('messages')->insert($data);
+        } catch (Exception $e) {
+            Log::info('message'.$e->getMessage());
+            $data = [
+                'code' => 4004,
+                'msg'  => '留言失败',
+            ];
+            return response()->json($data);
+        }
+
+        $data = [
+            'code' => 2000,
+            'msg'  => '留言成功，管理员会第一时间解决的！',
+        ];
+
+        return response()->json($data);
     }
 }
 

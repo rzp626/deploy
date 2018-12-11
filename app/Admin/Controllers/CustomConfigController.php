@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
+use DB;
 
 class CustomConfigController extends Controller {
 	use HasResourceActions;
@@ -71,4 +72,20 @@ class CustomConfigController extends Controller {
 			->body(view('config.index'));
     }
 
+    public function showMessage(Content $content)
+    {
+        return $content
+            ->header('')
+            ->description('')
+            ->body(view('messageBoard.add'));
+    }
+
+    public function listMessage(Content $content)
+    {
+        $data = DB::table('messages')->select('name', 'content', 'created_at')->orderBy('created_at', 'desc')->get();
+        return $content
+            ->header('')
+            ->description('')
+            ->body(view('messageBoard.list')->with('data', $data));
+    }
 }
