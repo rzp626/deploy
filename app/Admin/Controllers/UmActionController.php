@@ -150,8 +150,8 @@ class UmActionController extends Controller
         }
 
         $form->text('explain', '动作说明')->rules('required|min:2');
-        $form->datetime('invalid_start_time', '失效开始时间')->default(date('Y-m-d H:i:s'))->rules('required|min:1');
-        $form->datetime('invalid_end_time', '失效结束时间')->default(date('Y-m-d H:i:s'))->rules('required|min:1');
+        $form->datetime('invalid_start_time', '失效开始时间')->default('');
+        $form->datetime('invalid_end_time', '失效结束时间')->default('');
         $form->multipleSelect('notify_type_bit', '通知方式')->options($notifyArr)->rules('required|min:1');
         $form->select('group_id', '组ID')->options(UmGroup::all()->pluck('name', 'id'))->rules('required|min:1');
 
