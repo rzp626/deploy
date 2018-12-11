@@ -94,7 +94,8 @@
     </style>
   </head>
   <body>
-  <form action="" class="dark-matter">
+  <form id="myForm" class="dark-matter" method="post" action="/addMessage">
+    {{ csrf_field() }}
     <h1>留言板
     <span></span>
     </h1>
@@ -116,7 +117,7 @@
     </label>
   </form>
   <script>
-      $("#mySendBtn").on('click', function(){
+      $("#myForm #mySendBtn").on('click', function(){
           var uname = $("#uname").val();
           if (typeof uname == 'undefined' || uname == '') {
               $("#uname").focus();
@@ -141,7 +142,7 @@
               return false;
           }
 
-
+          return true;
           $.ajax({
               url: '/addMessage',
               type: 'POST',
@@ -149,6 +150,7 @@
               data: {'name': uname, 'email': email, 'content': content, '_token': "{{csrf_token()}}"},
               success: function (data) {
                   console.log(data);
+                  return true;
                   if (typeof data.code != 'undefined') {
                       if (data.code == '4000') { // 参数有误
                           alert(data.msg);
@@ -156,11 +158,10 @@
                       } else if (data.code == '2000') { // 路径有效
                           alert(data.msg);
                           // window.location.reload();
-                          window.location.href="/admin/dp/list_message";
+                          //window.location.href="/admin/dp/list_message";
                           return true;
                       } else if (data.code == '4004') { // 路径无效
                           alert(data.msg);
-                          window.location.reload();
                           return false;
                       } else {
                           alert('留言失败');
@@ -170,6 +171,7 @@
               },
               error: function (data) {
                   console.log(data);
+                  return false;
               }
           });
       });

@@ -82,7 +82,7 @@ class CustomConfigController extends Controller {
 
     public function listMessage(Content $content)
     {
-        $data = DB::table('messages')->select('name', 'content', 'created_at')->orderBy('created_at', 'desc')->get();
+        $data = DB::table('messages')->select('name', 'content', 'created_at')->orderBy('created_at', 'desc')->offset(0)->limit(20)->get();
         return $content
             ->header('')
             ->description('')

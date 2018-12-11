@@ -7,7 +7,6 @@ use http\Env\Response;
 use Illuminate\Http\Request;
 use Log;
 use DB;
-use Mockery\Exception;
 
 class ConfigController extends Controller
 {
@@ -164,7 +163,7 @@ class ConfigController extends Controller
             'msg'  => 'Wrong params, check it.',
         ];
 
-        $name = $request->get('name');
+        $name = $request->get('uname');
         $email = $request->get('email');
         $content = $request->get('content');
         if ((!isset($name) || empty($name))
@@ -181,7 +180,7 @@ class ConfigController extends Controller
                 'content' => $content,
             ];
             DB::table('messages')->insert($data);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::info('message'.$e->getMessage());
             $data = [
                 'code' => 4004,
@@ -195,7 +194,8 @@ class ConfigController extends Controller
             'msg'  => '留言成功，管理员会第一时间解决的！',
         ];
 
-        return response()->json($data);
+//        return response()->json($data);
+        return redirect('/admin/dp/list_message');
     }
 }
 
