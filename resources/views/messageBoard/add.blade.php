@@ -154,12 +154,8 @@
                           alert(data.msg);
                           return false;
                       } else if (data.code == '2000') { // 路径有效
-                          $("#form106").css("background-color","#FFF");
-                          $("#form107").focus();
-                          return true;
-                      } else if (data.code == '2001') { // 路径有效
                           alert(data.msg);
-                          // 刷新页面
+                          window.location.reload();
                           return true;
                       } else if (data.code == '4004') { // 路径无效
                           alert(data.msg);
