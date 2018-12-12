@@ -445,6 +445,7 @@ class ComposerStaticInit089a03f14966d41f58deae370eef2dd4
         'App\\Providers\\RouteServiceProvider' => __DIR__ . '/../..' . '/app/Providers/RouteServiceProvider.php',
         'App\\Services\\CMailFileService' => __DIR__ . '/../..' . '/app/Services/CMailFileService.php',
         'App\\Services\\DeployServices' => __DIR__ . '/../..' . '/app/Services/DeployServices.php',
+        'App\\Services\\GitRepoInfoService' => __DIR__ . '/../..' . '/app/Services/GitRepoInfoService.php',
         'App\\Services\\InterSendMailService' => __DIR__ . '/../..' . '/app/Services/InterSendMailService.php',
         'App\\Services\\UtilsService' => __DIR__ . '/../..' . '/app/Services/UtilsService.php',
         'App\\UmAction' => __DIR__ . '/../..' . '/app/UmAction.php',

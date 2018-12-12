@@ -157,7 +157,7 @@ class UmStrategyController extends Controller
 
 
         $form->embeds('rule', '报警规则', function ($form) use ($operatorArr, $aggregateArr) {
-            $form->text('ex_query', '查询条件')->rules('required|min:1');
+            $form->text('es_query', '查询条件')->rules('required|min:1');
             $form->select('aggregate', '聚合条件')->options($aggregateArr)->rules('required|min:1');
             $form->select('operator', '操作符号')->options($operatorArr)->rules('required|min:1');
             $form->number('threshold', '阈值')->rules('required|min:1');

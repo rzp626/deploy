@@ -13,6 +13,7 @@ use DB;
 use App\DeploymentTask;
 use App\DeploymentConfig;
 use Exception;
+use Mage\MageApplication;
 set_time_limit(0);
 
 class DeployOptJob implements ShouldQueue
@@ -105,6 +106,7 @@ class DeployOptJob implements ShouldQueue
         $branch_name = $taskBranchArr[$this->params['branchId']];
         $info = DeploymentConfig::where('id', $this->params['configId'])->first();
         $config_path = $info->config_from;
+        $config_name = $info->config_name;
         $config_env = $info->config_env;
         $config_branch = $info->config_branch;
         $this->config_hosts = $info->config_hosts; // 远程主机地址
@@ -116,15 +118,19 @@ class DeployOptJob implements ShouldQueue
             exit;
         }
 
+        // 切换到部署项目所在目录
+        $config_path = rtrim(config('deployment.src_path'), '/').'/'.$config_name;
         chdir($config_path);
         Log::info('now the path== '.getcwd());
         // 测试环境下的php路径
         $phpPathArr = config('deployment.php_path');
         Log::info('the php path '.print_r($phpPathArr, true));
-//        $phpPath = $phpPathArr['test']; // 本地
-        $phpPath = $phpPathArr['production']; // 线上
+        $phpPath = $phpPathArr['test']; // 本地
+//        $phpPath = $phpPathArr['production']; // 线上
 
-        $cmd = ['nohup', $phpPath, $vendorMageBin, $this->action, $env_name];
+        $ymlPath = rtrim(config('deployment.yml_path'), '/').'/config-'.$this->params['configId'].'-mage.yml';
+        $cmd = ['nohup', $phpPath, $vendorMageBin, $this->action, $env_name, $ymlPath];
+//        $cmd = ['nohup', $phpPath, $vendorMageBin, $this->action, $env_name];
         Log::info('the cmd info: '.json_encode($cmd));
 
         return $cmd;
@@ -196,7 +202,7 @@ class DeployOptJob implements ShouldQueue
     protected function optDeploy()
     {
         $arrCmd = $this->optCommon();
-        if (!isset($arrCmd) || empty($arrCmd) || count($arrCmd) !== 5) {
+        if (!isset($arrCmd) || empty($arrCmd) || count($arrCmd) !== 6) {
             Log::info('the wrong cmd is: '.json_encode($arrCmd));
             return false;
         }
@@ -218,6 +224,7 @@ class DeployOptJob implements ShouldQueue
 
             $this->modifyStatus($status, $res);
         }
+
 
         return true;
     }

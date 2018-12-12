@@ -84,12 +84,12 @@ class UtilsService {
 	 * @param $configItem 配置项
 	 * @return bool
 	 */
-	public static function generateConfigForMage($configItem) {
+	public static function generateConfigForMage($configItem, $configId) {
 		if (!is_array($configItem) || empty($configItem)) {
 			Log::info('the config params is wrong.check it.');
 			return false;
 		}
-		Log::info('the ret ' . print_r($configItem, true));
+		Log::info('the ret ' . print_r($configItem, true).' & the config id: '.$configId);
 		$customFieldArr = config('deployment.custom_field');
 		$initMapFields = config('deployment.init_map_field');
 		$deployConfigArr = config('deployment');
@@ -119,6 +119,12 @@ class UtilsService {
 			unset($configItem[$k]);
 		}
 
+		$customBranch = '';
+        if (isset($configItem['custom_config_branch']) && strlen($configItem['custom_config_branch']) > 0 && $configItem['custom_config_branch'] != 0) {
+            $customBranch = $configItem['custom_config_branch'];
+            unset($configItem['custom_config_branch']);
+        }
+
 		extract($configItem);
 
 		$config_env = $deployConfig['task_env'][$config_env];
@@ -137,7 +143,11 @@ class UtilsService {
 		$mageYmlFile['magephp']['environments'][$config_env] = [];
 		$mageYmlFile['magephp']['log_dir'] = $log_dir;
 
-		$ymlFile = rtrim($config_from, '/') . '/.mage.yml';
+		// 修改配置问题
+        $ymlPath = config('deployment.yml_path');
+//		$ymlFile = rtrim($config_from, '/') . '/.mage.yml';
+        $ymlFile = rtrim($ymlPath, '/') . '/config-'.$configId.'-mage.yml';
+
 		if (!file_exists($ymlFile)) {
 			foreach ($tmpl as $key => $value) {
 				Log::info('magephp' . print_r($mageYmlFile, true));
@@ -148,7 +158,11 @@ class UtilsService {
 					} else if ($tmpArr[1] == 'const') {
 						$mageYmlFile['magephp']['environments'][$config_env][$key] = $value;
 					} else if ($tmpArr[1] == 'map') {
-						$mageYmlFile['magephp']['environments'][$config_env][$key] = $deployConfig['task_branch'][${$tmpArr[0]}];
+					    if (strlen($customBranch) > 0) {
+                            $mageYmlFile['magephp']['environments'][$config_env][$key] = $customBranch;
+                        } else {
+                            $mageYmlFile['magephp']['environments'][$config_env][$key] = $deployConfig['task_branch'][${$tmpArr[0]}];
+                        }
 					} else if ($tmpArr[1] == 'int') {
 						$mageYmlFile['magephp']['environments'][$config_env][$key] = (int) ${$tmpArr[0]};
 					} else if ($tmpArr[1] == 'array') {
@@ -188,7 +202,11 @@ class UtilsService {
 									} else if ($tmpArr[1] == 'const') {
 										$info[$rootMage][$item][$config_env][$key] = $value;
 									} else if ($tmpArr[1] == 'map') {
-										$info[$rootMage][$item][$config_env][$key] = $deployConfig['task_branch'][${$tmpArr[0]}];
+									    if (strlen($customBranch) > 0) {
+                                            $info[$rootMage][$item][$config_env][$key] = $customBranch;
+                                        } else {
+                                            $info[$rootMage][$item][$config_env][$key] = $deployConfig['task_branch'][${$tmpArr[0]}];
+                                        }
 									} else if ($tmpArr[1] == 'int') {
 										$info[$rootMage][$item][$config_env][$key] = (int) ${$tmpArr[0]};
 									} else if ($tmpArr[1] == 'array') {

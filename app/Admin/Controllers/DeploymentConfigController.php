@@ -6,6 +6,7 @@ use App\Admin\Extensions\CheckRow;
 use App\Admin\Extensions\Tools\UserGender;
 use App\DeploymentConfig;
 use App\Http\Controllers\Controller;
+use App\Services\GitRepoInfoService;
 use App\Services\UtilsService;
 use Encore\Admin\Admin;
 use Encore\Admin\Controllers\HasResourceActions;
@@ -121,6 +122,7 @@ class DeploymentConfigController extends Controller
             return '';
         });
 
+        $grid->custom_config_branch('自定义部署分支');
         $grid->updated_at('创建时间');
         $grid->operator('操作人');
         $grid->tools(function ($tools) {
@@ -289,13 +291,14 @@ class DeploymentConfigController extends Controller
         $form->tab('配置基本项', function ($form) {
             $branchArr = config('deployment.deploy_config');
             $form->text('config_name', '项目名')->placeholder('输入配置环境名称')->rules('required|min:3');
-            $form->select('config_env', '部署环境')->options($branchArr['task_env'])->placeholder('请选择部署环境');
+            $form->select('config_env', '部署环境')->options($branchArr['task_env'])->placeholder('请选择部署环境')->rules('required|min:1');
             $form->text('config_user', '权限用户')->placeholder('输入目标主机权限用户名')->rules('required|min:1');
-            $form->select('config_branch', '选取分支')->options($branchArr['task_branch'])->placeholder('选择部署分支');
-            $form->text('config_from', '源路径')->placeholder('输入部署文件所在路径')->rules('required|min:2');
+            $form->select('config_branch', '选取分支')->options($branchArr['task_branch'])->placeholder('选择部署分支')->rules('required|min:1');
+            $form->text('custom_config_branch', '自定义分支')->placeholder('可输入自定义部署分支')->default('');
+            $form->hidden('config_from', '源路径')->placeholder('输入部署文件所在路径')->default('');;
             $form->text('config_host_path', '目标主机路径')->placeholder('输入部署主机文件所在路径')->rules('required|min:3');
             $form->text('config_releases', '备份数量')->placeholder('输入部署主机保留的版本数')->rules('required|min:1');
-            $form->textarea('config_exlude', '非部署目录/文件')->placeholder('输入部署时排除的文件/目录')->rows(5)->rules('required|min:3');
+            $form->textarea('config_exlude', '非部署目录/文件')->placeholder('输入部署时排除的文件/目录')->rows(5);
             $form->textarea('config_hosts', '部署主机')->placeholder('一行一主机')->rows(10)->rules('required|min:3');
         })->tab('pre-deploy阶段任务', function ($form) {
             $branchArr = config('deployment.deploy_config');
@@ -341,7 +344,7 @@ class DeploymentConfigController extends Controller
             // 添加一个按钮, 参数可以是字符串, 或者实现了Renderable或Htmlable接口的对象实例
 //            $tools->add('<a class="btn btn-sm btn-danger"><i class="fa fa-trash"></i>&nbsp;&nbsp;delete</a>');
         });
-
+//        $form->ignore(['custom_config_branch']);
         // 表单写入前判断
         $form->saving(function (Form $form){
             $allFields = $form->input(null);
@@ -354,6 +357,16 @@ class DeploymentConfigController extends Controller
                     'message' => '请检查必填配置项',
                 ]);
                 return back()->with(compact('error'));
+            }
+
+            $customBranch = $form->input('custom_config_branch');
+            if (empty($customBranch)) {
+                $form->input('custom_config_branch', '');
+            }
+
+            $configFrom = $form->input('config_from');
+            if (empty($configFrom)) {
+                $form->input('config_from', '');
             }
 
             // 排除目录/文件
@@ -540,10 +553,22 @@ class DeploymentConfigController extends Controller
 
         // 成功写表后的操作, 生产magephp部署的配置文件
         $form->saved(function (Form $form) {
+            // git clone | pull repo操作
+            $gitName = $form->input('config_name');
+            $configUser = $form->input('config_user');
+            $branch = $form->input('config_branch');
+            $customBranch = $form->input('custom_config_branch');
+            if ($customBranch !== 0 && !empty($customBranch) && strlen($customBranch) > 0) {
+                $branch = $customBranch;
+            }
+            $configId = $form->model()->id;
+            GitRepoInfoService::getGitInfo($gitName, $configUser, $branch, $configId);
+
             $retry_time = 3;
+            $configId = $form->model()->id;
             while ($retry_time) {
                 //var_dump(request()->all(), $form->input(null));
-                $returnRes = UtilsService::generateConfigForMage($form->input(null));
+                $returnRes = UtilsService::generateConfigForMage($form->input(null), $configId);
                 if ($returnRes) {
                     break;
                 }

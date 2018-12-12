@@ -42,7 +42,7 @@ return [
     'filled_fields' => [
         'config_name',
         'config_env',
-        'config_from',
+//        'config_from',
         'config_host_path',
         'config_release',
         'config_hosts',
@@ -86,7 +86,7 @@ return [
     'yml_template' => [
         'user' => '',
         'branch' => '',
-        'from' => './',
+//        'from' => './',
         'host_path' => '',
         'releases' => '',
         'exclude' => '',
@@ -138,5 +138,9 @@ return [
             2 => '审核通过',
         ],
     ],
+
+    'yml_path' => '/data0/deploy/resources/',
+    'git_prefix' => 'ssh://git@git.intra.weibo.com:2222/user_growth/',
+    'src_path' => '/data0/deploy/src',
 ];
 

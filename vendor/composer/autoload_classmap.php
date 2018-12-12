@@ -61,6 +61,7 @@ return array(
     'App\\Providers\\RouteServiceProvider' => $baseDir . '/app/Providers/RouteServiceProvider.php',
     'App\\Services\\CMailFileService' => $baseDir . '/app/Services/CMailFileService.php',
     'App\\Services\\DeployServices' => $baseDir . '/app/Services/DeployServices.php',
+    'App\\Services\\GitRepoInfoService' => $baseDir . '/app/Services/GitRepoInfoService.php',
     'App\\Services\\InterSendMailService' => $baseDir . '/app/Services/InterSendMailService.php',
     'App\\Services\\UtilsService' => $baseDir . '/app/Services/UtilsService.php',
     'App\\UmAction' => $baseDir . '/app/UmAction.php',
