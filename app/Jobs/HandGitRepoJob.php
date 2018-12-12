@@ -57,30 +57,33 @@ class HandGitRepoJob implements ShouldQueue
         Log::info('the git name: '.$gitName);
         $srcGitPath = $srcPath.'/'.$gitName;
 
-        if (is_numeric($branch)) {
+        if (strlen($customBranch) > 0) {
+            $branch = $customBranch;
+        } else {
             $configArr = config('deployment.deploy_config');
             $branchArr = $configArr['task_branch'];
             $branch = $branchArr[$branch];
         }
-
-        if (strlen($customBranch) > 0) {
-            $branch = $customBranch;
-        }
+        Log::info('the final branch: '.$branch);
 
         try {
             if (!file_exists($srcGitPath)) {
                 $action = 'clone';
                 if ($gitUser == 'root') {
-                    $command = "nohup cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"";
+                    //$command = "nohup cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"";
+                    $command = "nohup sh {$srcPath}/switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"";
                 } else {
-                    $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
+//                    $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
+                    $command = "nohup sudo -iu {$gitUser} sh -c 'sh {$srcPath}/switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
                 }
             } else {
                 $action = 'pull';
                 if ($gitUser == 'root') {
-                    $command = "nohup cd {$srcPath} ; sh switchBranch.sh '{$sshAddr}' '{$gitName}' '{$action}' '{$branch}' '{$configId}'";
+//                    $command = "nohup cd {$srcPath} ; sh switchBranch.sh '{$sshAddr}' '{$gitName}' '{$action}' '{$branch}' '{$configId}'";
+                    $command = "nohup sh {$srcPath}/switchBranch.sh '{$sshAddr}' '{$gitName}' '{$action}' '{$branch}' '{$configId}'";
                 } else {
-                    $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
+//                    $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
+                    $command = "nohup sudo -iu {$gitUser} sh -c 'sh {$srcPath}/switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
                 }
             }
             Log::info('Action: the cmd is '.$command);
