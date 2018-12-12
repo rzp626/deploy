@@ -82,8 +82,8 @@ class UmActionController extends Controller
     protected function grid()
     {
         $grid = new Grid(new UmAction);
-
-        $grid->id('动作ID');
+        $grid->model()->orderBy('id', 'desc');
+        $grid->id('动作ID')->sortable();
         $grid->name('动作名称');
         $grid->explain('动作说明');
         $grid->notify_type_bit('通知方式')->display(function ($notify_type_bit) {
@@ -139,14 +139,13 @@ class UmActionController extends Controller
         $form = new Form(new UmAction);
 
         $notifyArr = config('params.notify_way');
-
+        $actionInfo = [];
         $method = request()->route()->getActionMethod();
         if ($method == 'create' || $method == 'store') {
             $form->text('name', '动作名称')->rules('required|min:2');
             $actionInfo = UmAction::getActionInfo();
         } else if ($method == 'update' || $method == 'edit') {
             $form->text('name', '动作名称')->rules('required|min:2')->readOnly();
-            $actionInfo = [];
         }
 
         $form->text('explain', '动作说明')->rules('required|min:2');

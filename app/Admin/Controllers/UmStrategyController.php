@@ -81,8 +81,8 @@ class UmStrategyController extends Controller
     protected function grid()
     {
         $grid = new Grid(new UmStrategy);
-
-        $grid->id('策略ID');
+        $grid->model()->orderBy('id', 'desc');
+        $grid->id('策略ID')->sortable();
         $grid->name('策略名称');
         $grid->explain('策略说明');
         $grid->rule('报警规则')->display(function ($rule) {

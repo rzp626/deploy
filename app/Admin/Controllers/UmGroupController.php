@@ -82,8 +82,8 @@ class UmGroupController extends Controller
     protected function grid()
     {
         $grid = new Grid(new UmGroup);
-
-        $grid->id('组ID');
+        $grid->model()->orderBy('id', 'desc');
+        $grid->id('组ID')->sortable();
         $grid->name('组名字');
         $grid->explain('组描述');
         $grid->members('组成员');
@@ -129,14 +129,13 @@ class UmGroupController extends Controller
     {
         $form = new Form(new UmGroup);
 
+        $groupInfo = [];
         $method = request()->route()->getActionMethod();
-
         if ($method == 'create' || $method == 'store') {
             $form->text('name', '名称')->rules('required|min:3');
             $groupInfo = UmGroup::getGroupInfo();
         } else if ($method == 'edit' || $method == 'update') {
             $form->text('name', '名称')->rules('required|min:3')->readOnly();
-            $groupInfo = [];
         }
 
         $form->text('explain', '描述')->rules('required|min:2');
