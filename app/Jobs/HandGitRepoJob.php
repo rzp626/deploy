@@ -1,37 +1,54 @@
 <?php
 
-namespace App\Services;
+namespace App\Jobs;
 
-use Symfony\Component\Process\Process;
+use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Log;
-use App\Jobs\HandGitRepoJob;
+use Symfony\Component\Process\Process;
 set_time_limit(0);
 
-class GitRepoInfoService
+class HandGitRepoJob implements ShouldQueue
 {
-    public static function handleQueue($arr, $id)
-    {
-        Log::info('the arr: '.print_r($arr, true)." and the id: ".$id);
-        $job = (new HandGitRepoJob($arr, $id))->onQueue('handle_git_repo');
-        dispatch($job);
-    }
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected $params;
+    protected $configId;
+
     /**
-     * @param $gitName
-     * @return bool
+     * Create a new job instance.
+     *
+     * @return void
      */
-    public static function getGitInfo($sshAddr, $gitUser, $branch, $configId)
+    public function __construct($arrParams = null, $configId = null)
     {
-        // clone或者pull对应的仓库
-        if (!isset($gitUser) || empty($gitUser) || !is_string($gitUser)
-            || !isset($configId) || empty($configId)
-            || !isset($sshAddr) || empty($sshAddr)) {
+        $this->params = $arrParams;
+        $this->configId = $configId;
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        if (empty($this->params) || empty($this->configId)) {
+            Log::info('The job '.__CLASS__.' wrong params.');
             return false;
         }
-        Log::info('the ssh addr: '.$sshAddr.'git user: '.$gitUser.' and the branch: '.$branch.' and the config Id: '.$configId);
+
+        $sshAddr = $this->params['config_ssh_addr'];
+        $gitUser = $this->params['config_user'];
+        $branch = $this->params['config_branch'];
+        $customBranch = $this->params['custom_config_branch'];
+        $configId = $this->configId;
+        Log::info(__LINE__.'the ssh addr: '.$sshAddr.'git user: '.$gitUser.' and the branch: '.$branch.' and the config Id: '.$configId);
 
         $repoPrefix = config('deployment.git_prefix');
-//        $fullGitPath = $repoPrefix . $gitName . '.git';
-//        $fullGitPath = 'http://zhenpeng8:20181203%40rzp@git.intra.weibo.com/user_growth/msg-new.git';
         $srcPath = config('deployment.src_path');
         $sshArr = explode('/', $sshAddr);
         $gitName = $sshArr[count($sshArr) - 1];
@@ -46,22 +63,25 @@ class GitRepoInfoService
             $branch = $branchArr[$branch];
         }
 
+        if (strlen($customBranch) > 0) {
+            $branch = $customBranch;
+        }
+
         try {
             if (!file_exists($srcGitPath)) {
                 $action = 'clone';
-//                $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} && git clone {$fullGitPath}' && sh switchBranch.sh {$gitName} {$action} {$branch} {$configId}";
                 if ($gitUser == 'root') {
                     $command = "nohup cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"";
                 } else {
                     $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
                 }
-//                $ret = exec("$command > /dev/null 2>&1 &", $output);
-                //Log::info('Clone: the cmd is '.$command . ' and the ret is '.json_encode($output) . ' & the ret: '.print_r($ret, true). ' the output: '.print_r($output, true));
             } else {
                 $action = 'pull';
-//                $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} && cd {$gitName} && sh switchBranch.sh {$gitName} {$action} {$branch} {$configId} && git pull $fullGitPath";
-                $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
-//                $ret = exec("$command > /dev/null 2>&1 &", $output);
+                if ($gitUser == 'root') {
+                    $command = "nohup cd {$srcPath} ; sh switchBranch.sh '{$sshAddr}' '{$gitName}' '{$action}' '{$branch}' '{$configId}'";
+                } else {
+                    $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
+                }
             }
             Log::info('Action: the cmd is '.$command);
 
@@ -89,10 +109,24 @@ class GitRepoInfoService
                 return false;
             }
 
+            Log::info('Op for deploy config is over.');
             return true;
         } catch (\Exception $e) {
             Log::info('exception info is '.$e->getMessage());
-            return 'fail';
+            return false;
         }
+    }
+
+    /**
+     * 要处理的失败任务
+     *
+     * @param Exception $exception
+     * @return void
+     */
+    public function failed(\Exception $exception)
+    {
+        // 给用户发送失败通知，等等。。。
+        Log::info('the queue is failed ,check it ,'.$exception->getMessage());
+        return false;
     }
 }

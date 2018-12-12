@@ -146,7 +146,7 @@ class DeployController extends Controller
             return response()->json($data);
         }
 
-        $this->dispatch(new DeployOptJob('deploy', $params));
+        $this->dispatch((new DeployOptJob('deploy', $params))->onQueue('handle_deploy'));
         $data = [
             'code' => '200',
             'msg' => '发布队列添加成功，请稍后刷新页面查看结果',
@@ -191,7 +191,7 @@ class DeployController extends Controller
         }
 
         $this->dispatch(new DeployOptJob('releases:rollback', $ids));
-        $this->dispatch(new ReviewEmailJob($admin->user()->username, 'rollback'));
+        $this->dispatch((new ReviewEmailJob($admin->user()->username, 'rollback'))->onQueue('handle_rollback'));
         $data = [
             'code' => '200',
             'msg' => '回滚队列添加成功，等待执行结果',

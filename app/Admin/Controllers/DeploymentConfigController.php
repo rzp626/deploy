@@ -6,6 +6,7 @@ use App\Admin\Extensions\CheckRow;
 use App\Admin\Extensions\Tools\UserGender;
 use App\DeploymentConfig;
 use App\Http\Controllers\Controller;
+use App\Jobs\HandGitRepoJob;
 use App\Services\GitRepoInfoService;
 use App\Services\UtilsService;
 use Encore\Admin\Admin;
@@ -564,10 +565,13 @@ class DeploymentConfigController extends Controller
                 $branch = $customBranch;
             }
             $configId = $form->model()->id;
-            GitRepoInfoService::getGitInfo($sshAddr, $configUser, $branch, $configId);
+//            GitRepoInfoService::handleQueue($form->input(null), $configId);
+//            GitRepoInfoService::getGitInfo($sshAddr, $configUser, $branch, $configId);
+//            $this->dispatch(new HandGitRepoJob($form->input(null), $configId));
+            $job = (new HandGitRepoJob($form->input(null), $configId))->onQueue('handle_git_repo');
+            dispatch($job);
 
             $retry_time = 3;
-            $configId = $form->model()->id;
             while ($retry_time) {
                 //var_dump(request()->all(), $form->input(null));
                 $returnRes = UtilsService::generateConfigForMage($form->input(null), $configId);
