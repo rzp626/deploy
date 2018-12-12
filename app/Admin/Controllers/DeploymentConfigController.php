@@ -556,7 +556,6 @@ class DeploymentConfigController extends Controller
         // 成功写表后的操作, 生产magephp部署的配置文件
         $form->saved(function (Form $form) {
             // git clone | pull repo操作
-            $gitName = $form->input('config_name');
             $configUser = $form->input('config_user');
             $branch = $form->input('config_branch');
             $customBranch = $form->input('custom_config_branch');
@@ -565,7 +564,7 @@ class DeploymentConfigController extends Controller
                 $branch = $customBranch;
             }
             $configId = $form->model()->id;
-            GitRepoInfoService::getGitInfo($sshAddr, $gitName, $configUser, $branch, $configId);
+            GitRepoInfoService::getGitInfo($sshAddr, $configUser, $branch, $configId);
 
             $retry_time = 3;
             $configId = $form->model()->id;
