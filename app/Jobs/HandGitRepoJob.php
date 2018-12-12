@@ -69,15 +69,19 @@ class HandGitRepoJob implements ShouldQueue
         try {
             if (!file_exists($srcGitPath)) {
                 $action = 'clone';
+                $command = "nohup sudo -iu {$gitUser} sh -c 'sh {$srcPath}/switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
+                /*
                 if ($gitUser == 'root') {
                     //$command = "nohup cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"";
                     $command = "nohup sh {$srcPath}/switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"";
                 } else {
 //                    $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
-                    $command = "nohup sudo -iu {$gitUser} sh -c 'sh {$srcPath}/switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
                 }
+                */
             } else {
                 $action = 'pull';
+                $command = "nohup sudo -iu {$gitUser} sh -c 'sh {$srcPath}/switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
+                /*
                 if ($gitUser == 'root') {
 //                    $command = "nohup cd {$srcPath} ; sh switchBranch.sh '{$sshAddr}' '{$gitName}' '{$action}' '{$branch}' '{$configId}'";
                     $command = "nohup sh {$srcPath}/switchBranch.sh '{$sshAddr}' '{$gitName}' '{$action}' '{$branch}' '{$configId}'";
@@ -85,6 +89,7 @@ class HandGitRepoJob implements ShouldQueue
 //                    $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
                     $command = "nohup sudo -iu {$gitUser} sh -c 'sh {$srcPath}/switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
                 }
+                */
             }
             Log::info('Action: the cmd is '.$command);
 
