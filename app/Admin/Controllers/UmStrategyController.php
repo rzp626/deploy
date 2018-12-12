@@ -144,12 +144,12 @@ class UmStrategyController extends Controller
         $aggregateArr = config('params.aggregate');
         $method = request()->route()->getActionMethod();
 
+        $strategyInfo = [];
         if ($method == 'create' || $method == 'store') {
             $form->text('name', '策略名称')->rules('required|min:2');
             $strategyInfo = UmStrategy::getStrategyInfo();
         } else if ($method == 'edit' || $method == 'update') {
             $form->text('name', '策略名称')->rules('required|min:2')->readOnly();
-            $strategyInfo = [];
         }
 
         $form->text('explain', '策略说明')->rules('required|min:2');
