@@ -42,7 +42,11 @@ class GitRepoInfoService
             if (!file_exists($srcGitPath)) {
                 $action = 'clone';
 //                $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} && git clone {$fullGitPath}' && sh switchBranch.sh {$gitName} {$action} {$branch} {$configId}";
-                $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
+                if ($gitUser == 'root') {
+                    $command = "nohup cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"";
+                } else {
+                    $command = "nohup sudo -iu {$gitUser} sh -c 'cd {$srcPath} ; sh switchBranch.sh \"{$sshAddr}\" \"{$gitName}\" \"{$action}\" \"{$branch}\" \"{$configId}\"'";
+                }
                 $ret = exec("$command > /dev/null 2>&1 &", $output);
                 Log::info('Clone: the cmd is '.$command . ' and the ret is '.json_encode($output) . ' & the ret: '.print_r($ret, true). ' the output: '.print_r($output, true));
             } else {
