@@ -108,6 +108,7 @@ class DeployOptJob implements ShouldQueue
         $config_path = $info->config_from;
         $config_name = $info->config_name;
         $config_env = $info->config_env;
+        $sshAddr = $info->config_ssh_addr;
         $config_branch = $info->config_branch;
         $this->config_hosts = $info->config_hosts; // 远程主机地址
         $this->config_hosts_path = rtrim($info->config_host_path, '/'); // 远程主机目录
@@ -119,7 +120,11 @@ class DeployOptJob implements ShouldQueue
         }
 
         // 切换到部署项目所在目录
-        $config_path = rtrim(config('deployment.src_path'), '/').'/'.$config_name;
+        $sshArr = explode('/', $sshAddr);
+        $gitName = $sshArr[count($sshArr) - 1];
+        $pos = strrpos($gitName,'.');
+        $gitName = substr($gitName, 0, $pos);
+        $config_path = rtrim(config('deployment.src_path'), '/').'/'.$gitName;
         chdir($config_path);
         Log::info('now the path== '.getcwd());
         // 测试环境下的php路径
