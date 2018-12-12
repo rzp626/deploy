@@ -122,6 +122,7 @@ class DeploymentConfigController extends Controller
             return '';
         });
 
+        $grid->config_ssh_addr('项目ssh地址');
         $grid->custom_config_branch('自定义部署分支');
         $grid->updated_at('创建时间');
         $grid->operator('操作人');
@@ -291,6 +292,7 @@ class DeploymentConfigController extends Controller
         $form->tab('配置基本项', function ($form) {
             $branchArr = config('deployment.deploy_config');
             $form->text('config_name', '项目名')->placeholder('输入配置环境名称')->rules('required|min:3');
+            $form->text('config_ssh_addr', '项目ssh地址')->placeholder('输入项目仓库地址')->rules('required|min:3');
             $form->select('config_env', '部署环境')->options($branchArr['task_env'])->placeholder('请选择部署环境')->rules('required|min:1');
             $form->text('config_user', '权限用户')->placeholder('输入目标主机权限用户名')->rules('required|min:1');
             $form->select('config_branch', '选取分支')->options($branchArr['task_branch'])->placeholder('选择部署分支')->rules('required|min:1');
@@ -558,11 +560,12 @@ class DeploymentConfigController extends Controller
             $configUser = $form->input('config_user');
             $branch = $form->input('config_branch');
             $customBranch = $form->input('custom_config_branch');
+            $sshAddr = $form->input('config_ssh_addr');
             if ($customBranch !== 0 && !empty($customBranch) && strlen($customBranch) > 0) {
                 $branch = $customBranch;
             }
             $configId = $form->model()->id;
-            GitRepoInfoService::getGitInfo($gitName, $configUser, $branch, $configId);
+            GitRepoInfoService::getGitInfo($sshAddr, $gitName, $configUser, $branch, $configId);
 
             $retry_time = 3;
             $configId = $form->model()->id;
