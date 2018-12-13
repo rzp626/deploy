@@ -98,6 +98,10 @@ class UmGroupController extends Controller
         $grid->filter(function ($filter) {
             $filter->between('created_at', '创建日期')->datetime();
         });
+
+        $grid->actions(function (Grid\Displayers\Actions $actions) {
+            $actions->disableDelete();
+        });
         return $grid;
     }
 

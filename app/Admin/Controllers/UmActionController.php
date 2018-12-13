@@ -104,6 +104,10 @@ class UmActionController extends Controller
             $filter->between('created_at', '创建日期')->datetime();
         });
 
+        $grid->actions(function (Grid\Displayers\Actions $actions) {
+            $actions->disableDelete();
+        });
+
         return $grid;
     }
 
