@@ -125,6 +125,7 @@ class DeployOptJob implements ShouldQueue
         $pos = strrpos($gitName,'.');
         $gitName = substr($gitName, 0, $pos);
         $config_path = rtrim(config('deployment.src_path'), '/').'/'.$gitName;
+        Log::info('The src path: '.$config_path);
         chdir($config_path);
         Log::info('now the path== '.getcwd());
         // 测试环境下的php路径
