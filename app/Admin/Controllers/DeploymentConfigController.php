@@ -109,7 +109,7 @@ class DeploymentConfigController extends Controller
         $grid->config_env('配置环境')->display(function ($config_env) {
             $arr = config('deployment.deploy_config.task_env');
             if (isset($arr[$config_env])) {
-                return $arr[$config_env].'环境';
+                return $arr[$config_env];
             }
 
             return '';
@@ -117,7 +117,7 @@ class DeploymentConfigController extends Controller
         $grid->config_branch('选取分支')->display(function ($config_branch) {
             $arr = config('deployment.deploy_config.task_branch');
             if (isset($arr[$config_branch])) {
-                return $arr[$config_branch].'分支';
+                return $arr[$config_branch];
             }
 
             return '';

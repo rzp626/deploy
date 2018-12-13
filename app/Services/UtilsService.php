@@ -142,6 +142,8 @@ class UtilsService {
 //        $mageYmlFile['magephp']['environments'][$config_env] = $common_items;
 		$mageYmlFile['magephp']['environments'][$config_env] = [];
 		$mageYmlFile['magephp']['log_dir'] = $log_dir;
+        $mageYmlFile['magephp']['composer'] = config('deployment.composer_path');
+//        $mageYmlFile['magephp']['composer'] = '/usr/local/bin/composer';
 
 		// 修改配置问题
         $ymlPath = config('deployment.yml_path');

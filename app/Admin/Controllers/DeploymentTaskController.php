@@ -115,14 +115,14 @@ class DeploymentTaskController extends Controller
 		$grid->task_env('发布环境')->display(function ($task_env) {
 			$envArr = config('deployment.deploy_config.task_env');
 			if (isset($envArr[$task_env])) {
-				return $envArr[$task_env] . '环境';
+				return $envArr[$task_env];
 			}
 		});
 
 		$grid->task_branch('选取分支')->display(function ($task_branch) {
 			$branchArr = config('deployment.deploy_config.task_branch');
 			if (isset($branchArr[$task_branch])) {
-				return $branchArr[$task_branch] . '分支';
+				return $branchArr[$task_branch];
 			}
 		});
 

@@ -142,5 +142,8 @@ return [
     'yml_path' => '/data0/deploy/resources/',
     'git_prefix' => 'ssh://git@git.intra.weibo.com:2222/user_growth/',
     'src_path' => '/data0/deploy/src',
+    'composer_path' => [
+        'path' => '/usr/local/bin/composer',
+    ],
 ];
 
