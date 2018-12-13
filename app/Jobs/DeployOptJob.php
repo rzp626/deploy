@@ -130,8 +130,8 @@ class DeployOptJob implements ShouldQueue
         // 测试环境下的php路径
         $phpPathArr = config('deployment.php_path');
         Log::info('the php path '.print_r($phpPathArr, true));
-        $phpPath = $phpPathArr['test']; // 本地
-//        $phpPath = $phpPathArr['production']; // 线上
+//        $phpPath = $phpPathArr['test']; // 本地
+        $phpPath = $phpPathArr['production']; // 线上
 
         $ymlPath = rtrim(config('deployment.yml_path'), '/').'/config-'.$this->params['configId'].'-mage.yml';
         $cmd = ['nohup', $phpPath, $vendorMageBin, $this->action, $env_name, $ymlPath];
