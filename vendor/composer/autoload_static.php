@@ -436,6 +436,7 @@ class ComposerStaticInit089a03f14966d41f58deae370eef2dd4
         'App\\Http\\Middleware\\TrustProxies' => __DIR__ . '/../..' . '/app/Http/Middleware/TrustProxies.php',
         'App\\Http\\Middleware\\VerifyCsrfToken' => __DIR__ . '/../..' . '/app/Http/Middleware/VerifyCsrfToken.php',
         'App\\Jobs\\DeployOptJob' => __DIR__ . '/../..' . '/app/Jobs/DeployOptJob.php',
+        'App\\Jobs\\HandGitRepoJob' => __DIR__ . '/../..' . '/app/Jobs/HandGitRepoJob.php',
         'App\\Jobs\\ReviewEmailJob' => __DIR__ . '/../..' . '/app/Jobs/ReviewEmailJob.php',
         'App\\Jobs\\WxNotifyJob' => __DIR__ . '/../..' . '/app/Jobs/WxNotifyJob.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',

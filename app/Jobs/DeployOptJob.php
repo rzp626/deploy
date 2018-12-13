@@ -106,6 +106,7 @@ class DeployOptJob implements ShouldQueue
         $branch_name = $taskBranchArr[$this->params['branchId']];
         $info = DeploymentConfig::where('id', $this->params['configId'])->first();
         $config_path = $info->config_from;
+        $php_version = $info->config_php_version;
         $config_name = $info->config_name;
         $config_env = $info->config_env;
         $sshAddr = $info->config_ssh_addr;
@@ -133,6 +134,10 @@ class DeployOptJob implements ShouldQueue
         Log::info('the php path '.print_r($phpPathArr, true));
 //        $phpPath = $phpPathArr['test']; // 本地
         $phpPath = $phpPathArr['production']; // 线上
+        $phpBinPath = config('deployment.php_bin_path');
+        if ($php_version > 0) {
+            $phpPath = $phpBinPath[$php_version];
+        }
 
         $ymlPath = rtrim(config('deployment.yml_path'), '/').'/config-'.$this->params['configId'].'-mage.yml';
         $cmd = ['nohup', $phpPath, $vendorMageBin, $this->action, $env_name, $ymlPath];

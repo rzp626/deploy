@@ -292,8 +292,10 @@ class DeploymentConfigController extends Controller
         $form = new Form(new DeploymentConfig);
         $form->tab('配置基本项', function ($form) {
             $branchArr = config('deployment.deploy_config');
+            $phpVersionArr = config('deployment.php_version');
             $form->text('config_name', '项目名')->placeholder('输入配置环境名称')->rules('required|min:3');
             $form->text('config_ssh_addr', '项目ssh地址')->placeholder('输入项目仓库地址')->rules('required|min:3');
+            $form->select('config_php_version', '项目php版本')->options($phpVersionArr)->placeholder('选择php版本');
             $form->select('config_env', '部署环境')->options($branchArr['task_env'])->placeholder('请选择部署环境')->rules('required|min:1');
             $form->text('config_user', '权限用户')->placeholder('输入目标主机权限用户名')->rules('required|min:1');
             $form->select('config_branch', '选取分支')->options($branchArr['task_branch'])->placeholder('选择部署分支')->rules('required|min:1');
@@ -361,7 +363,6 @@ class DeploymentConfigController extends Controller
                 ]);
                 return back()->with(compact('error'));
             }
-
             $customBranch = $form->input('custom_config_branch');
             if (empty($customBranch)) {
                 $form->input('custom_config_branch', '');

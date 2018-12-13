@@ -52,6 +52,7 @@ return array(
     'App\\Http\\Middleware\\TrustProxies' => $baseDir . '/app/Http/Middleware/TrustProxies.php',
     'App\\Http\\Middleware\\VerifyCsrfToken' => $baseDir . '/app/Http/Middleware/VerifyCsrfToken.php',
     'App\\Jobs\\DeployOptJob' => $baseDir . '/app/Jobs/DeployOptJob.php',
+    'App\\Jobs\\HandGitRepoJob' => $baseDir . '/app/Jobs/HandGitRepoJob.php',
     'App\\Jobs\\ReviewEmailJob' => $baseDir . '/app/Jobs/ReviewEmailJob.php',
     'App\\Jobs\\WxNotifyJob' => $baseDir . '/app/Jobs/WxNotifyJob.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',

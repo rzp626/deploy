@@ -142,100 +142,113 @@ class UtilsService {
 //        $mageYmlFile['magephp']['environments'][$config_env] = $common_items;
 		$mageYmlFile['magephp']['environments'][$config_env] = [];
 		$mageYmlFile['magephp']['log_dir'] = $log_dir;
-        $mageYmlFile['magephp']['composer'] = config('deployment.composer_path');
-//        $mageYmlFile['magephp']['composer'] = '/usr/local/bin/composer';
+        $composerArr = config('deployment.composer_path');
+        Log::info('message: the php version: '.$config_php_version. ' the composer arr: '. print_r($composerArr, true));
+        if ($config_php_version > 0) {
+            $mageYmlFile['magephp']['composer'] = $composerArr[$config_php_version];
+        } else {
+            $mageYmlFile['magephp']['composer'] = $composerArr[2];
+        }
 
 		// 修改配置问题
         $ymlPath = config('deployment.yml_path');
 //		$ymlFile = rtrim($config_from, '/') . '/.mage.yml';
         $ymlFile = rtrim($ymlPath, '/') . '/config-'.$configId.'-mage.yml';
-
-		if (!file_exists($ymlFile)) {
-			foreach ($tmpl as $key => $value) {
-				Log::info('magephp' . print_r($mageYmlFile, true));
-				if (isset($tmplFields[$key])) {
-					$tmpArr = explode('|', $tmplFields[$key]);
-					if ($tmpArr[1] == 'normal') {
-						$mageYmlFile['magephp']['environments'][$config_env][$key] = ${$tmpArr[0]};
-					} else if ($tmpArr[1] == 'const') {
-						$mageYmlFile['magephp']['environments'][$config_env][$key] = $value;
-					} else if ($tmpArr[1] == 'map') {
-					    if (strlen($customBranch) > 0) {
-                            $mageYmlFile['magephp']['environments'][$config_env][$key] = $customBranch;
-                        } else {
-                            $mageYmlFile['magephp']['environments'][$config_env][$key] = $deployConfig['task_branch'][${$tmpArr[0]}];
+        if (file_exists($ymlFile)) {
+            unlink($ymlFile);
+        }
+        try {
+            if (!file_exists($ymlFile)) {
+                foreach ($tmpl as $key => $value) {
+                    Log::info('magephp' . print_r($mageYmlFile, true));
+                    if (isset($tmplFields[$key])) {
+                        $tmpArr = explode('|', $tmplFields[$key]);
+                        if ($tmpArr[1] == 'normal') {
+                            $mageYmlFile['magephp']['environments'][$config_env][$key] = ${$tmpArr[0]};
+                        } else if ($tmpArr[1] == 'const') {
+                            $mageYmlFile['magephp']['environments'][$config_env][$key] = $value;
+                        } else if ($tmpArr[1] == 'map') {
+                            if (strlen($customBranch) > 0) {
+                                $mageYmlFile['magephp']['environments'][$config_env][$key] = $customBranch;
+                            } else {
+                                $mageYmlFile['magephp']['environments'][$config_env][$key] = $deployConfig['task_branch'][${$tmpArr[0]}];
+                            }
+                        } else if ($tmpArr[1] == 'int') {
+                            $mageYmlFile['magephp']['environments'][$config_env][$key] = (int) ${$tmpArr[0]};
+                        } else if ($tmpArr[1] == 'array') {
+                            if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
+                                $mageYmlFile['magephp']['environments'][$config_env][$key] = '';
+                            } else if (is_array(${$tmpArr[0]})) {
+                                if (empty(${$tmpArr[0]})) {
+                                    $mageYmlFile['magephp']['environments'][$config_env][$key] = '';
+                                } else {
+                                    $mageYmlFile['magephp']['environments'][$config_env][$key] = ${$tmpArr[0]};
+                                }
+                            }
                         }
-					} else if ($tmpArr[1] == 'int') {
-						$mageYmlFile['magephp']['environments'][$config_env][$key] = (int) ${$tmpArr[0]};
-					} else if ($tmpArr[1] == 'array') {
-						if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
-							$mageYmlFile['magephp']['environments'][$config_env][$key] = '';
-						} else if (is_array(${$tmpArr[0]})) {
-							if (empty(${$tmpArr[0]})) {
-								$mageYmlFile['magephp']['environments'][$config_env][$key] = '';
-							} else {
-								$mageYmlFile['magephp']['environments'][$config_env][$key] = ${$tmpArr[0]};
-							}
-						}
-					}
-				}
-				Log::info('magephp' . print_r($mageYmlFile, true));
-			}
-			$yaml = preg_replace("/'/", '', Yaml::dump($mageYmlFile, 5, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
-			file_put_contents($ymlFile, $yaml); // 写如到对应的文件中的image中
-			if (!chmod($ymlFile, 0777)) {
-				Log::info('修改mage.yml文件权限失败，请检查，手动修改777。');
-			}
-			return true;
-		} else {
-			$info = Yaml::parseFile($ymlFile);
-			if (isset($info) && !empty($info)) {
-				foreach ($info as $rootMage => $configArr) {
-					// 一位大数组
-					foreach ($configArr as $item => $v) {
-						// 二级配置项
-						if ($item == 'environments') {
-							// 实际的配置项目
-							foreach ($tmpl as $key => $value) {
-								if (isset($tmplFields[$key])) {
-									$tmpArr = explode('|', $tmplFields[$key]);
-									if ($tmpArr[1] == 'normal') {
-										$info[$rootMage][$item][$config_env][$key] = ${$tmpArr[0]};
-									} else if ($tmpArr[1] == 'const') {
-										$info[$rootMage][$item][$config_env][$key] = $value;
-									} else if ($tmpArr[1] == 'map') {
-									    if (strlen($customBranch) > 0) {
-                                            $info[$rootMage][$item][$config_env][$key] = $customBranch;
-                                        } else {
-                                            $info[$rootMage][$item][$config_env][$key] = $deployConfig['task_branch'][${$tmpArr[0]}];
-                                        }
-									} else if ($tmpArr[1] == 'int') {
-										$info[$rootMage][$item][$config_env][$key] = (int) ${$tmpArr[0]};
-									} else if ($tmpArr[1] == 'array') {
-										if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
-											$info[$rootMage][$item][$config_env][$key] = '';
-										} else if (is_array(${$tmpArr[0]})) {
+                    }
+                    Log::info('magephp' . print_r($mageYmlFile, true));
+                }
+                $yaml = preg_replace("/'/", '', Yaml::dump($mageYmlFile, 5, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+                file_put_contents($ymlFile, $yaml); // 写如到对应的文件中的image中
+                if (!chmod($ymlFile, 0777)) {
+                    Log::info('修改mage.yml文件权限失败，请检查，手动修改777。');
+                }
+                return true;
+            } else {
+                $info = Yaml::parseFile($ymlFile);
+                if (isset($info) && !empty($info)) {
+                    foreach ($info as $rootMage => $configArr) {
+                        // 一位大数组
+                        foreach ($configArr as $item => $v) {
+                            // 二级配置项
+                            if ($item == 'environments') {
+                                // 实际的配置项目
+                                foreach ($tmpl as $key => $value) {
+                                    if (isset($tmplFields[$key])) {
+                                        $tmpArr = explode('|', $tmplFields[$key]);
+                                        if ($tmpArr[1] == 'normal') {
+                                            $info[$rootMage][$item][$config_env][$key] = ${$tmpArr[0]};
+                                        } else if ($tmpArr[1] == 'const') {
+                                            $info[$rootMage][$item][$config_env][$key] = $value;
+                                        } else if ($tmpArr[1] == 'map') {
+                                            if (strlen($customBranch) > 0) {
+                                                $info[$rootMage][$item][$config_env][$key] = $customBranch;
+                                            } else {
+                                                $info[$rootMage][$item][$config_env][$key] = $deployConfig['task_branch'][${$tmpArr[0]}];
+                                            }
+                                        } else if ($tmpArr[1] == 'int') {
+                                            $info[$rootMage][$item][$config_env][$key] = (int) ${$tmpArr[0]};
+                                        } else if ($tmpArr[1] == 'array') {
+                                            if (${$tmpArr[0]} === null || ${$tmpArr[0]} == '') {
+                                                $info[$rootMage][$item][$config_env][$key] = '';
+                                            } else if (is_array(${$tmpArr[0]})) {
 //                                            $info[$rootMage][$item][$config_env][$key] = array_merge($builInArr, $customArr);
-											if (empty(${$tmpArr[0]})) {
-												$info[$rootMage][$item][$config_env][$key] = '';
-											} else {
-												$info[$rootMage][$item][$config_env][$key] = ${$tmpArr[0]};
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			$yaml = preg_replace("/'/", '', Yaml::dump($info, 5, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
-			file_put_contents($ymlFile, $yaml); // 写如到对应的文件中的image中
-			if (!chmod($ymlFile, 0777)) {
-				Log::info('修改mage.yml文件权限失败，请检查，手动修改777。');
-			}
-			return true;
-		}
+                                                if (empty(${$tmpArr[0]})) {
+                                                    $info[$rootMage][$item][$config_env][$key] = '';
+                                                } else {
+                                                    $info[$rootMage][$item][$config_env][$key] = ${$tmpArr[0]};
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::info('gen yml is failed, the reason: '.$e->getMessage());
+            return false;
+        }
+
+        $yaml = preg_replace("/'/", '', Yaml::dump($info, 5, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+        file_put_contents($ymlFile, $yaml); // 写如到对应的文件中的image中
+        if (!chmod($ymlFile, 0777)) {
+            Log::info('修改mage.yml文件权限失败，请检查，手动修改777。');
+        }
+        return true;
 	}
 
 	/**

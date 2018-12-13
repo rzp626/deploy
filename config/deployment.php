@@ -143,7 +143,21 @@ return [
     'git_prefix' => 'ssh://git@git.intra.weibo.com:2222/user_growth/',
     'src_path' => '/data0/deploy/src',
     'composer_path' => [
-        'path' => '/usr/local/bin/composer',
+        1 => [
+            'path' => '/usr/local/bin/composer7',
+        ],
+        2 => [
+            'path' => '/usr/local/bin/composer',
+        ],
+    ],
+    'php_version' => [
+        0 => '可选php版本',
+        1=> '7.1+',
+        2 => '5.6',
+    ],
+    'php_bin_path' => [
+        1 => '/usr/local/sina_mobile/php71/bin/php',
+        2 => '/usr/local/sina_mobile/php56/bin/php'
     ],
 ];
 
