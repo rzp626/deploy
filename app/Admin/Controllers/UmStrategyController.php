@@ -121,7 +121,9 @@ class UmStrategyController extends Controller
         $show->id('策略ID');
         $show->name('策略名称');
         $show->explain('策略说明');
-        $show->rule('报警规则');
+        $show->rule('报警规则')->as(function ($rule) {
+            return json_encode($rule);
+        });
         $show->cycle_times_x('周期次数x值');
         $show->cycle_times_y('周期次数y值');
         $show->level('报警级别');
