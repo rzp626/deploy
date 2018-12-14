@@ -27,7 +27,7 @@ class ReviewController extends Controller {
 	public function index(Content $content) {
 		return $content
 			->header('审核列表')
-			->description('')
+			->description('list')
 			->body($this->grid());
 	}
 

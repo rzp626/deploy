@@ -48,7 +48,7 @@ class DeploymentTaskController extends Controller
 	public function index(Content $content) {
 		return $content
 			->header('工单列表')
-			->description('')
+			->description('list')
 			->body($this->grid());
 	}
 
@@ -62,7 +62,7 @@ class DeploymentTaskController extends Controller
 	public function show($id, Content $content) {
 		return $content
 			->header('任务详情')
-			->description('查看该任务详情')
+			->description('show')
 			->body($this->detail($id));
 	}
 
@@ -76,7 +76,7 @@ class DeploymentTaskController extends Controller
 	public function edit($id, Content $content) {
 		return $content
 			->header('编辑')
-			->description('编辑任务')
+			->description('edit')
 			->body($this->form()->edit($id));
 	}
 
@@ -89,7 +89,7 @@ class DeploymentTaskController extends Controller
 	public function create(Content $content) {
 		return $content
 			->header('新增发单')
-			->description('task')
+			->description('create')
 			->body($this->form());
 	}
 

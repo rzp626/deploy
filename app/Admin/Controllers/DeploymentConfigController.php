@@ -45,7 +45,7 @@ class DeploymentConfigController extends Controller
         $arr = config('deployment.deploy_config');
         return $content
             ->header('配置列表')
-            ->description('')
+            ->description('list')
             ->body($this->grid($arr));
     }
 
@@ -60,7 +60,7 @@ class DeploymentConfigController extends Controller
     {
         return $content
             ->header('查看')
-            ->description('配置详情页')
+            ->description('show')
             ->body($this->detail($id));
     }
 
@@ -75,7 +75,7 @@ class DeploymentConfigController extends Controller
     {
         return $content
             ->header('编辑配置')
-            ->description('重新编辑各个配置项')
+            ->description('edit')
             ->body($this->form($id)->edit($id));
     }
 
@@ -89,7 +89,7 @@ class DeploymentConfigController extends Controller
     {
         return $content
             ->header('新增部署配置')
-            ->description('新增部署配置项目')
+            ->description('create')
             ->body($this->form());
     }
 
