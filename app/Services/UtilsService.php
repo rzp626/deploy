@@ -150,6 +150,8 @@ class UtilsService {
             $mageYmlFile['magephp']['composer'] = $composerArr[2];
         }
 
+        $iterm = 'git/update';
+        array_unshift($config_pre_deploy, $iterm);
 		// 修改配置问题
         $ymlPath = config('deployment.yml_path');
 //		$ymlFile = rtrim($config_from, '/') . '/.mage.yml';
