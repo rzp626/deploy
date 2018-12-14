@@ -181,7 +181,7 @@ class DeploymentConfigController extends Controller
         $show->config_releases('备份数量');
         $show->config_host_path('目标主机路径');
         $show->config_exlude('非部署目录')->as(function ($config_exlude) {
-            $arr = explode('|', $config_exlude);
+            $arr = explode("\r\n", $config_exlude);
             if (count($arr) > 1) {
                 $str = implode("<br>", $arr);
                 return $str;
@@ -190,7 +190,7 @@ class DeploymentConfigController extends Controller
             }
         });
         $show->config_hosts('部署主机')->as(function ($config_hosts) {
-            $arr = explode('|', $config_hosts);
+            $arr = explode("\r\n", $config_hosts);
             if (count($arr) > 1) {
                 $str = implode("<br>", $arr);
                 return $str;
@@ -204,74 +204,115 @@ class DeploymentConfigController extends Controller
                 return '';
             }
 
-            $arr = explode('|', $config_pre_deploy);
+            $arr = explode("\r\n", $config_pre_deploy);
             $str = '';
             foreach ($arr as $k => $v) {
-                $str .= $preDeployArr[$v] . '|';
+                $str .= $preDeployArr[$v] . "<br>";
             }
 
-            return rtrim($str, '|');
+            return rtrim($str, "<br>");
         });
-        $show->custom_pre_deploy('pre-deploy自定义任务');
+        $show->custom_pre_deploy('pre-deploy自定义任务')->as(function ($custom_pre_deploy) {
+            $arr = explode("\r\n", $custom_pre_deploy);
+            if (count($arr) > 1) {
+                $str = implode("<br>", $arr);
+                return $str;
+            } else {
+                return $custom_pre_deploy;
+            }
+        });
+
         $show->config_on_deploy('on-deploy命令')->as(function ($config_on_deploy) use($onDeployArr) {
             if (empty($config_on_deploy)) {
                 return '';
             }
 
-            $arr = explode('|', $config_on_deploy);
+            $arr = explode("\r\n", $config_on_deploy);
             $str = '';
             foreach ($arr as $k => $v) {
-                $str .= $onDeployArr[$v] . '|';
+                $str .= $onDeployArr[$v] . '<br>';
             }
 
-            return rtrim($str, '|');
+            return rtrim($str, '<br>');
         });
-        $show->custom_on_deploy('on-deploy自定义命令');
+        $show->custom_on_deploy('on-deploy自定义命令')->as(function ($custom_on_deploy) {
+            $arr = explode("\r\n", $custom_on_deploy);
+            if (count($arr) > 1) {
+                $str = implode("<br>", $arr);
+                return $str;
+            } else {
+                return $custom_on_deploy;
+            }
+        });
 
         $show->config_on_release('on-release命令')->as(function ($config_on_release) use($onReleaseArr) {
             if (empty($config_on_release)) {
                 return '';
             }
 
-            $arr = explode('|', $config_on_release);
+            $arr = explode("\r\r", $config_on_release);
             $str = '';
             foreach ($arr as $k => $v) {
-                $str .= $onReleaseArr[$v] . '|';
+                $str .= $onReleaseArr[$v] . '<br>';
             }
 
-            return rtrim($str, '|');
+            return rtrim($str, '<br>');
         });
-        $show->custom_on_release('on-release自定义命令');
+        $show->custom_on_release('on-release自定义命令')->as(function ($custom_on_release) {
+            $arr = explode("\r\n", $custom_on_release);
+            if (count($arr) > 1) {
+                $str = implode("<br>", $arr);
+                return $str;
+            } else {
+                return $custom_on_release;
+            }
+        });
 
         $show->config_post_release('post-release命令')->as(function ($config_post_release) use($postReleaseArr) {
             if (empty($config_post_release)) {
                 return '';
             }
 
-            $arr = explode('|', $config_post_release);
+            $arr = explode("\r\n", $config_post_release);
             $str = '';
             foreach ($arr as $k => $v) {
-                $str .= $postReleaseArr[$v] . '|';
+                $str .= $postReleaseArr[$v] . '<br>';
             }
 
-            return rtrim($str, '|');
+            return rtrim($str, '<br>');
         });
-        $show->custom_post_release('post-release自定义命令');
+        $show->custom_post_release('post-release自定义命令')->as(function ($custom_post_release) {
+            $arr = explode("\r\n", $custom_post_release);
+            if (count($arr) > 1) {
+                $str = implode("<br>", $arr);
+                return $str;
+            } else {
+                return $custom_post_release;
+            }
+        });
 
         $show->config_post_deploy('post-deploy命令')->as(function ($config_post_deploy) use($postDeployArr) {
             if (empty($config_post_deploy)) {
                 return '';
             }
 
-            $arr = explode('|', $config_post_deploy);
+            $arr = explode("\r\n", $config_post_deploy);
             $str = '';
             foreach ($arr as $k => $v) {
-                $str .= $postDeployArr[$v] . '|';
+                $str .= $postDeployArr[$v] . '<br>';
             }
 
-            return rtrim($str, '|');
+            return rtrim($str, '<br>');
         });
-        $show->custom_post_deploy('post-deploy自定义命令');
+        $show->custom_post_deploy('post-deploy自定义命令')->as(function($custom_post_deploy) {
+            $arr = explode("\r\n", $custom_post_deploy);
+            if (count($arr) > 1) {
+                $str = implode("<br>", $arr);
+                return $str;
+            } else {
+                return $custom_post_deploy;
+            }
+        });
 
         $show->panel()
             ->tools(function ($tools) {
@@ -338,7 +379,7 @@ class DeploymentConfigController extends Controller
 
         $form->tools(function (Form\Tools $tools) {
             // 去掉 '列表' 按钮
-            $tools->disableList();
+//            $tools->disableList();
 
             // 取缔 '删除' 按钮
             $tools->disableDelete();

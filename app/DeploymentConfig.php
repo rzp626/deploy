@@ -175,7 +175,7 @@ class DeploymentConfig extends Model
         $this->attributes['config_hosts'] =trim(implode("|",$value),',');
     }
 
-    public function gettConfigHostsAttribute($value){
+    public function getConfigHostsAttribute($value){
         $arr = explode('|', $value);
         if (count($arr) > 1) {
             $str = implode("\r\n", $arr);
