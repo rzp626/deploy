@@ -241,7 +241,7 @@ class DeploymentConfigController extends Controller
 
             return rtrim($str, '|');
         });
-        $show->custom_on_release('on-deploy自定义命令');
+        $show->custom_on_release('on-release自定义命令');
 
         $show->config_post_release('post-release命令')->as(function ($config_post_release) use($postReleaseArr) {
             if (empty($config_post_release)) {
@@ -256,7 +256,7 @@ class DeploymentConfigController extends Controller
 
             return rtrim($str, '|');
         });
-        $show->custom_post_release('on-deploy自定义命令');
+        $show->custom_post_release('post-release自定义命令');
 
         $show->config_post_deploy('post-deploy命令')->as(function ($config_post_deploy) use($postDeployArr) {
             if (empty($config_post_deploy)) {
@@ -271,7 +271,7 @@ class DeploymentConfigController extends Controller
 
             return rtrim($str, '|');
         });
-        $show->custom_post_deploy('on-deploy自定义命令');
+        $show->custom_post_deploy('post-deploy自定义命令');
 
         $show->panel()
             ->tools(function ($tools) {

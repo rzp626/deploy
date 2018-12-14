@@ -41,48 +41,164 @@ class DeploymentConfig extends Model
     public function setConfigPreDeployAttribute($value){
         $this->attributes['config_pre_deploy'] =trim(implode("|",$value),',');
     }
+    public function getConfigPreDeployAttribute($value){
+        $arr = explode('|', $value);
+        if (count($arr) > 1) {
+            $str = implode("\r\n", $arr);
+            return $str;
+        } else {
+            return $value;
+        }
+    }
 
     public function setConfigOnDeployAttribute($value){
         $this->attributes['config_on_deploy'] =trim(implode("|",$value),',');
+    }
+    public function getConfigOnDeployAttribute($value){
+        $arr = explode('|', $value);
+        if (count($arr) > 1) {
+            $str = implode("\r\n", $arr);
+            return $str;
+        } else {
+            return $value;
+        }
     }
 
     public function setConfigOnReleaseAttribute($value){
         $this->attributes['config_on_release'] =trim(implode("|",$value),',');
     }
+    public function getConfigOnReleaseAttribute($value){
+        $arr = explode('|', $value);
+        if (count($arr) > 1) {
+            $str = implode("\r\n", $arr);
+            return $str;
+        } else {
+            return $value;
+        }
+    }
+
     public function setConfigPostReleaseAttribute($value){
         $this->attributes['config_post_release'] =trim(implode("|",$value),',');
+    }
+
+    public function getConfigPostReleaseAttribute($value){
+        $arr = explode('|', $value);
+        if (count($arr) > 1) {
+            $str = implode("\r\n", $arr);
+            return $str;
+        } else {
+            return $value;
+        }
     }
 
     public function setConfigPostDeployAttribute($value){
         $this->attributes['config_post_deploy'] =trim(implode("|",$value),',');
     }
+    public function getConfigPostDeployAttribute($value){
+        $arr = explode('|', $value);
+        if (count($arr) > 1) {
+            $str = implode("\r\n", $arr);
+            return $str;
+        } else {
+            return $value;
+        }
+    }
 
     public function setCustomPreDeployAttribute($value){
         $this->attributes['custom_pre_deploy'] =trim(implode("|",$value),',');
+    }
+    public function getCustomPreDeployAttribute($value){
+        $arr = explode('|', $value);
+        if (count($arr) > 1) {
+            $str = implode("\r\n", $arr);
+            return $str;
+        } else {
+            return $value;
+        }
     }
 
     public function setCustomOnDeployAttribute($value){
         $this->attributes['custom_on_deploy'] =trim(implode("|",$value),',');
     }
+    public function getCustomOnDeployAttribute($value){
+        $arr = explode('|', $value);
+        if (count($arr) > 1) {
+            $str = implode("\r\n", $arr);
+            return $str;
+        } else {
+            return $value;
+        }
+    }
 
     public function setCustomOnReleaseAttribute($value){
         $this->attributes['custom_on_release'] =trim(implode("|",$value),',');
     }
+    public function getCustomOnReleaseAttribute($value){
+        $arr = explode('|', $value);
+        if (count($arr) > 1) {
+            $str = implode("\r\n", $arr);
+            return $str;
+        } else {
+            return $value;
+        }
+    }
+
     public function setCustomPostReleaseAttribute($value){
         $this->attributes['custom_post_release'] =trim(implode("|",$value),',');
+    }
+
+    public function getCustomPostReleaseAttribute($value){
+        $arr = explode('|', $value);
+        if (count($arr) > 1) {
+            $str = implode("\r\n", $arr);
+            return $str;
+        } else {
+            return $value;
+        }
     }
 
     public function setCustomPostDeployAttribute($value){
         $this->attributes['custom_post_deploy'] =trim(implode("|",$value),',');
     }
 
+    public function getCustomPostDeployAttribute($value){
+        $arr = explode('|', $value);
+        if (count($arr) > 1) {
+            $str = implode("\r\n", $arr);
+            return $str;
+        } else {
+            return $value;
+        }
+    }
+
     public function setConfigHostsAttribute($value){
         $this->attributes['config_hosts'] =trim(implode("|",$value),',');
+    }
+
+    public function gettConfigHostsAttribute($value){
+        $arr = explode('|', $value);
+        if (count($arr) > 1) {
+            $str = implode("\r\n", $arr);
+            return $str;
+        } else {
+            return $value;
+        }
     }
 
     public function setConfigExludeAttribute($value){
         if (!empty($value)) {
             $this->attributes['config_exlude'] =trim(implode("|",$value),',');
+        }
+    }
+
+    public function getConfigExludeAttribute($value)
+    {
+        $arr = explode('|', $value);
+        if (count($arr) > 1) {
+            $str = implode("\r\n", $arr);
+            return $str;
+        } else {
+            return $value;
         }
     }
 
