@@ -225,24 +225,28 @@ class DeployOptJob implements ShouldQueue
 
         $deployObj = new DeployServices($this->action);
         $res = $deployObj->doShellCmd($arrCmd);
-        if (false === $res) {
-            Log::info('the action: '.$this->action.' deploy failed.check it.');
-            $status = 1;
-            $this->modifyStatus($status);
-            return false;
-        } else if (is_array($res)) {
-            Log::info('the acton: '.$this->action.' & the res is: '.json_encode($res));
-            if (!isset($res['releaseId']) || !isset($res['logPath'])) {
+        if (is_array($res) && array_key_exists('ret', $res)) {
+            if ($res['ret'] === false) {
+                Log::info('the action: '.$this->action.' deploy failed.check it.');
                 $status = 3;
-            } else {
-                $status = 2;
+                $this->modifyStatus($status);
+                return false;
+            } else if ($res['ret'] === true) {
+                Log::info('the acton: '.$this->action.' & the res is: '.json_encode($res));
+                if (!isset($res['releaseId']) || !isset($res['logPath'])) {
+                    $status = 3;
+                } else {
+                    $status = 2;
+                }
+
+                $this->modifyStatus($status, $res);
+
+                return true;
             }
-
-            $this->modifyStatus($status, $res);
+        } else {
+            Log::info('exception has happened.');
+            return false;
         }
-
-
-        return true;
     }
 
     /**

@@ -68,12 +68,17 @@ class DeployServices
             if (!$process->isSuccessful()) { // deploy 失败，操作失败的提示信息
                 Log::info('error: '.json_encode($process->getErrorOutput()). ' the cwd: '.$process->getWorkingDirectory().' and the incre info: '.$process->getIncrementalErrorOutput().' and the exit code text: '.$process->getExitCodeText());
                 Log::info(json_encode($processCmd).'执行失败。');
-                return false;
+                return [
+                    'releaseId' => $this->releaseId,
+                    'logPath' => $this->logPath,
+                    'ret' => false,
+                ];
             }
 
             return [
                 'releaseId' => $this->releaseId,
                 'logPath' => $this->logPath,
+                'ret' => true,
             ];
         } catch (\Exception $e) {
             Log::info('mage op failed, catch the exception info: '.$e->getMessage());
