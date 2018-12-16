@@ -144,7 +144,8 @@ class DeployOptJob implements ShouldQueue
 
 
         $ymlPath = rtrim(config('deployment.yml_path'), '/').'/config-'.$this->params['configId'].'-mage.yml';
-        $cmd = ['nohup', $phpPath, $vendorMageBin, $this->action, $env_name, $ymlPath];
+//        $cmd = ['nohup', $phpPath, $vendorMageBin, $this->action, $env_name, $ymlPath];
+        $cmd = [$phpPath, $vendorMageBin, $this->action, $env_name, $ymlPath];
 //        $cmd = ['nohup', $phpPath, $vendorMageBin, $this->action, $env_name];
         Log::info('the cmd info: '.json_encode($cmd));
 
