@@ -229,8 +229,6 @@ class DeployOptJob implements ShouldQueue
             if ($res['ret'] === false) {
                 Log::info('the action: '.$this->action.' deploy failed.check it.');
                 $status = 3;
-                $this->modifyStatus($status);
-                return false;
             } else if ($res['ret'] === true) {
                 Log::info('the acton: '.$this->action.' & the res is: '.json_encode($res));
                 if (!isset($res['releaseId']) || !isset($res['logPath'])) {
@@ -238,11 +236,10 @@ class DeployOptJob implements ShouldQueue
                 } else {
                     $status = 2;
                 }
-
-                $this->modifyStatus($status, $res);
-
-                return true;
             }
+            $this->modifyStatus($status, $res);
+
+            return true;
         } else {
             Log::info('exception has happened.');
             return false;
