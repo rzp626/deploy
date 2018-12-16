@@ -73,6 +73,7 @@ class DeployOptJob implements ShouldQueue
      */
     public function handle()
     {
+        Log::info('the env is: '.print_r(shell_exec('env'),true));
         Log::info('the action: '.$this->action.', and the params: '.json_encode($this->params));
         if (!isset($this->action) || empty($this->params)) {
             return false;
