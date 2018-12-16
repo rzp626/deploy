@@ -10,6 +10,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Log;
 use App\Services\UtilsService;
 use App\DeploymentTask;
+// 保证即使用户把浏览器关掉（断开连接），php也会在服务器上继续执行
+ignore_user_abort(true);
 
 class WxNotifyJob implements ShouldQueue
 {

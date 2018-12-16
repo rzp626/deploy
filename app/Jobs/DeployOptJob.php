@@ -14,6 +14,9 @@ use App\DeploymentTask;
 use App\DeploymentConfig;
 use Exception;
 use Mage\MageApplication;
+// 保证即使用户把浏览器关掉（断开连接），php也会在服务器上继续执行
+ignore_user_abort(true);
+// 无限制的执行下去
 set_time_limit(0);
 
 class DeployOptJob implements ShouldQueue
@@ -138,6 +141,7 @@ class DeployOptJob implements ShouldQueue
         if ($php_version > 0) {
             $phpPath = $phpBinPath[$php_version];
         }
+
 
         $ymlPath = rtrim(config('deployment.yml_path'), '/').'/config-'.$this->params['configId'].'-mage.yml';
         $cmd = ['nohup', $phpPath, $vendorMageBin, $this->action, $env_name, $ymlPath];
