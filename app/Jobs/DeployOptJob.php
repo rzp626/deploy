@@ -218,7 +218,7 @@ class DeployOptJob implements ShouldQueue
     protected function optDeploy()
     {
         $arrCmd = $this->optCommon();
-        if (!isset($arrCmd) || empty($arrCmd) || count($arrCmd) !== 6) {
+        if (!isset($arrCmd) || empty($arrCmd) || count($arrCmd) !== 5) {
             Log::info('the wrong cmd is: '.json_encode($arrCmd));
             return false;
         }
