@@ -346,25 +346,25 @@ class DeploymentConfigController extends Controller
             $form->text('config_releases', '备份数量')->placeholder('输入部署主机保留的版本数')->rules('required|min:1');
             $form->textarea('config_exlude', '非部署目录/文件')->placeholder('输入部署时排除的文件/目录')->rows(5);
             $form->textarea('config_hosts', '部署主机')->placeholder('一行一主机')->rows(10)->rules('required|min:3');
-        })->tab('pre-deploy阶段任务', function ($form) {
+        })->tab('pre-deploy', function ($form) {
             $branchArr = config('deployment.deploy_config');
             $form->checkbox('config_pre_deploy', '[可选]')->options($branchArr['pre-deploy'])->placeholder('输入部署前该阶段执行的任务(多个任务用|分割)')->stacked();
             $form->textarea('custom_pre_deploy', '[自定义]')->rows(5)->placeholder('输入自定义执行的任务(一行一命令)');
-        })->tab('on-deploy阶段任务', function ($form) {
+        })->tab('on-deploy', function ($form) {
             $branchArr = config('deployment.deploy_config');
             $form->checkbox('config_on_deploy', '[可选]')->options($branchArr['on-deploy'])->placeholder('输入部署时该阶段执行的任务(多个任务用|分割)')->stacked();
             $form->textarea('custom_on_deploy', '[自定义]')->rows(5)->placeholder('输入自定义执行的任务(一行一命令)');
-        })->tab('on-release阶段任务', function ($form) {
+        })->tab('on-release', function ($form) {
             $branchArr = config('deployment.deploy_config');
             $form->checkbox('config_on_release', '[可选]')->options($branchArr['on-release'])->placeholder('输入部署主机发布时执行的任务(多个任务用|分割)）')->stacked();
             $form->textarea('custom_on_release', '[自定义]')->rows(5)->placeholder('输入自定义执行的任务(一行一命令)');
 
-        })->tab('post-release阶段任务', function ($form) {
+        })->tab('post-release', function ($form) {
             $branchArr = config('deployment.deploy_config');
             $form->checkbox('config_post_release', '[可选]')->options($branchArr['post-release'])->placeholder('输入部署主机发布后执行的任务(多个任务用|分割)')->stacked();
             $form->textarea('custom_post_release', '[自定义]')->rows(5)->placeholder('输入自定义执行的任务(一行一命令)');
 
-        })->tab('post-deploy阶段任务', function ($form) {
+        })->tab('post-deploy', function ($form) {
             $branchArr = config('deployment.deploy_config');
             $form->checkbox('config_post_deploy', '[可选]')->options($branchArr['post-deploy'])->placeholder('输入部署后执行的任务(多个任务用|分割)')->stacked();
             $form->textarea('custom_post_deploy', '[自定义]')->rows(5)->placeholder('输入自定义执行的任务(一行一命令)');
