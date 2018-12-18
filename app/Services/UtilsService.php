@@ -147,7 +147,7 @@ class UtilsService {
         if ($config_php_version > 0) {
             $mageYmlFile['magephp']['composer'] = $composerArr[$config_php_version];
         } else {
-            $mageYmlFile['magephp']['composer'] = $composerArr[2];
+            $mageYmlFile['magephp']['composer'] = $composerArr[1];
         }
 
         $iterm = 'git/update';
