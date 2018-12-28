@@ -36,4 +36,5 @@ Route::group([
     $router->resource('group/manage', UmGroupController::class);
     $router->resource('group/action', UmActionController::class);
     $router->resource('group/strategy', UmStrategyController::class);
+    $router->match(['get','post'],'ug/dauline', 'UgDauController@index');
 });
