@@ -96,24 +96,24 @@ class UgDauController extends Controller
             }
 
             return $content
-                ->header('Chartjs')
+                ->header('厂商DAU')
                 ->body($this->form())
-                ->body(new Box('图表',
+                ->body(new Box('Line Box',
                         view('ugvideo.index', [
-                            'some'=>\GuzzleHttp\json_encode($some),
-                            'cs'=>\GuzzleHttp\json_encode($cs),
-                            'series'=>\GuzzleHttp\json_encode($series),
+                            'some'=>\json_encode($some),
+                            'cs'=>\json_encode($cs),
+                            'series'=>\json_encode($series),
                         ]))
                 );
         }else{
             return $content
-                ->header('Chartjs')
+                ->header('厂商DAU')
                 ->body($this->form())
-                ->body(new Box('图表',
+                ->body(new Box('Line Box',
                         view('ugvideo.index', [
-                            'some'=>\GuzzleHttp\json_encode($some),
-                            'cs'=>\GuzzleHttp\json_encode($cs),
-                            'series'=>\GuzzleHttp\json_encode([]),
+                            'some'=>\json_encode($some),
+                            'cs'=>\json_encode($cs),
+                            'series'=>\json_encode([]),
                         ]))
                 );
         }
@@ -203,7 +203,7 @@ class UgDauController extends Controller
     protected function form()
     {
 
-        $form = new Form(new Dauline);
+        $form = new Form(new \App\DauLine());
         $form->dateRange('start', 'end', '时间');
         $cs = array_keys(self::CS);
         $form->select('cs', '厂商')->options($cs)->value($cs)->default($cs[0]);

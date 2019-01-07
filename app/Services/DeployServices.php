@@ -39,6 +39,7 @@ class DeployServices
             Log::info('do cmd params is wrong.check it.');
             return false;
         }
+	Log::info('the process cmd: '.print_r($processCmd, true));
 
         try {
             $process = new Process($processCmd);

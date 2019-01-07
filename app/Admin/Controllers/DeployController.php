@@ -190,7 +190,7 @@ class DeployController extends Controller
             return response()->json($data);
         }
 
-        $this->dispatch(new DeployOptJob('releases:rollback', $ids));
+        $this->dispatch((new DeployOptJob('releases:rollback', $ids))->onQueue('handle_rollback'));
         $this->dispatch((new ReviewEmailJob($admin->user()->username, 'rollback'))->onQueue('handle_rollback'));
         $data = [
             'code' => '200',
