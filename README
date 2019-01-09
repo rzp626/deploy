@@ -1,4 +1,4 @@
-本项目是基于Laravel Admin + Magephp构建的简易上线发布系统
+本项目是基于Laravel-admin + Magephp构建的简易上线发布系统
 
 注意事项：
 1. 检查配置生成的.mage.yml文件权限；
@@ -11,3 +11,9 @@ to-do-list
 2. 静态文件瘦身
 3. 表单项值校验: 是否为空，是否为0
 4. 异步发布、回滚时，回调通知待修改
+
+
+参考链接：
+  Larval-admin手册：https://laravel-admin.org/docs/zh
+  Magallanes：https://www.magephp.com/
+  Laravel数据迁移： https://laravel-china.org/docs/laravel/5.5/migrations/1329#generating-migrations
