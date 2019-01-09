@@ -80,8 +80,8 @@ class InterSendMailService
             $this->headers .= "MIME-Version: 1.0";
             $this->headers .= "PHP-Version:phpversion()\r\n";
             $this->headers .= "Content-type:text/html;charset=utf-8\r\n";
-            $this->headers .= "From:dau_monitor@vip.sina.com\r\n";
-            $this->headers .= "Reply-To:dau_monitor@vip.sina.com\r\n";
+            $this->headers .= "From:XXX\r\n";
+            $this->headers .= "Reply-To:XXX\r\n";
         }
     }
 

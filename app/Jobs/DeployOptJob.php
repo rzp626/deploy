@@ -259,8 +259,8 @@ class DeployOptJob implements ShouldQueue
             Log::info('the wrong cmd is: '.json_encode($arrCmd));
             return false;
         }
-	
-	$mageFile = array_pop($arrCmd);
+
+        $mageFile = array_pop($arrCmd);
         array_push($arrCmd, $this->params['releaseId']);
         array_push($arrCmd, $mageFile);
 
