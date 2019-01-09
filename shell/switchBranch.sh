@@ -18,7 +18,7 @@ ori="origin/"
 pl=`$git pull `
 co=`$git checkout `
 gbr=`$git branch `
-gitRepo='ssh://git@git.intra.weibo.com:2222/user_growth/'
+gitRepo='xxxx'
 
 if [ ! -f $log_path"/"$common_log_name ]; then 
     touch $log_path "/" $common_log_name
@@ -53,7 +53,6 @@ echo "项目路径: "$work_path"/"$proName
 if [ ! -d $work_path"/"$proName ]; then
     chmod -R 777 $log_path"/"$configId"-"$clone_log_name
     echo "$LINENO"  "$log_date" "$work_path/$proName"  "项目不存在 start to clone" >> $log_path"/"$common_log_name
-    #gitRepo='http://zhenpeng8:20181203%40rzp@git.intra.weibo.com/user_growth/'
     if [ $actionName = "clone" ]; then
         #cd $work_path ; $git $actionName $gitRepo$proName".git" >> $log_path"/"$configId"-"$clone_log_name 2>&1     
         cd $work_path 
