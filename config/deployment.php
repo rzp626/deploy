@@ -116,13 +116,7 @@ return [
     ],
 
     'admin' => [
-        'organization' => '增长技术',
-        'organizationt3' => '新浪集团_微博_微博产品部',
-        'companyCode' => 'SINA',
-        'telephone' => '',
-        'companyCodes' => '',
-        'uid' => '',
-        'erpname' => '',
+
     ],
 
     'php_path' => [
@@ -140,7 +134,7 @@ return [
     ],
 
     'yml_path' => '/data0/deploy/resources/',
-    'git_prefix' => 'ssh://git@git.intra.weibo.com:2222/user_growth/',
+    'git_prefix' => 'xxx',
     'src_path' => '/data0/deploy/src',
     'composer_path' => [
         1 => [
