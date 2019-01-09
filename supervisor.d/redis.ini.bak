@@ -1,0 +1,6 @@
+[program:redis]
+command = /usr/local/Cellar/redis/4.0.11/bin/redis-server /usr/local/etc/redis.conf 
+autostart = true
+startsecs = 5
+autorestart = true
+startretries = 3
