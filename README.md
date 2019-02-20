@@ -1,4 +1,4 @@
-本项目是基于Laravel-admin + Magephp构建的简易上线发布系统
+## 本项目是基于Laravel-admin + Magephp构建的简易上线发布系统
 
 注意事项：
 1. 检查配置生成的.mage.yml文件权限；
